@@ -1,0 +1,34 @@
+/* Diálogo "Enviar al agente": dos columnas dentro del cuerpo del Dialog. Solo contenedor; las piezas
+ * son primitivos de ui/ (Check, Row, Dot, Badge, Button, Kbd, Hint). */
+.send { display: flex; gap: 22px; padding: 10px 10px 6px; min-height: 0; }
+.send__left { width: 260px; flex: none; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.send__right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+.send__thumb {
+  display: block;
+  width: 100%;
+  max-height: 240px;
+  object-fit: contain;
+  object-position: left top;
+  border-radius: 6px;
+  background: var(--bg);
+}
+.send__label { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: var(--fs-xs); font-weight: 500; color: var(--text-3); }
+.send__attach { display: flex; flex-direction: column; gap: 1px; margin: 0 -6px; }
+.send__targets { display: flex; flex-direction: column; gap: 1px; margin: 0 -4px; }
+.send__targets .row__meta { text-align: right; }
+.send__message { display: flex; flex-direction: column; }
+.send__text {
+  width: 100%;
+  min-height: 96px;
+  padding: 10px 12px;
+  border: 0;
+  outline: 0;
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: var(--fs-md)/1.55 var(--font);
+  resize: vertical;
+}
+.send__text::placeholder { color: var(--text-4); }
+.send__actions { display: flex; gap: 6px; justify-content: flex-end; }
+.send__note { flex-basis: 100%; color: var(--text-4); line-height: 1.5; }

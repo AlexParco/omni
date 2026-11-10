@@ -1,0 +1,17 @@
+.text-area {
+  display: block;
+  width: 100%;
+  min-height: 64px;
+  max-height: 220px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  font: var(--fs-md)/1.5 var(--font);
+  resize: vertical;
+  outline: 0;
+}
+.text-area::placeholder { color: var(--text-4); }
+/* Foco: relleno un paso más claro y nada de marco (regla de §3.8). */
+.text-area:focus { background: var(--surface-2); }

@@ -1,0 +1,32 @@
+/* Casilla de tarea: círculo de 16px (como Recordatorios), sin marco; el estado cambia el relleno, nunca el contorno. */
+.checkbox {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--surface-3);
+  color: var(--on-primary);
+  transition: background-color 0.15s;
+}
+.checkbox[data-state='done'] { background: var(--primary); }
+/* Agente trabajando: anillo ámbar (2px, border-box) con un punto en el centro, sobre fondo transparente. */
+.checkbox[data-state='working'] { background: transparent; border: 2px solid var(--status-working); border-radius: 50%; box-sizing: border-box; }
+.checkbox[data-state='working']::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status-working);
+}
+/* Casilla clicable: botón sin estilos propios; al pasar el mouse sube un tono (el ✓ se insinúa). */
+button.checkbox { padding: 0; border: 0; cursor: default; }
+@media (hover: hover) and (pointer: fine) {
+  button.checkbox[data-state='todo']:hover { background: var(--text-4); }
+  button.checkbox[data-state='done']:hover { filter: brightness(1.1); }
+}
+/* Área de clic del alto de una fila (36px) sin agrandar la casilla visible. */
+button.checkbox::before { content: ''; position: absolute; inset: -10px; }

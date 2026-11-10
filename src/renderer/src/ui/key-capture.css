@@ -1,0 +1,16 @@
+.keycap { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.keycap__button {
+  min-width: 120px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.keycap__button:hover { background: var(--surface-3); color: var(--text); }
+.keycap[data-capturing] .keycap__button { background: var(--surface-3); color: var(--text); }
+.keycap__error { font-size: var(--fs-xs); color: var(--status-question-text); }

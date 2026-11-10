@@ -1,0 +1,3 @@
+/* Diálogo "Nuevo perfil": solo contenedor del campo; las acciones van pegadas a la derecha del pie. */
+.profile-name { padding: 14px 10px 6px; }
+.profile-name__actions { margin-left: auto; display: inline-flex; gap: 6px; }

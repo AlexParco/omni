@@ -1,0 +1,11 @@
+.agent-icon { color: var(--text-2); flex: none; }
+.agent-icon--claude { color: var(--status-question); }
+/* Logos en mapa de bits (Goose, Hermes): máscaras recortadas al dibujo, pintadas con el color del texto
+ * como los SVG; así ninguno destaca con su propio fondo. */
+.agent-icon--goose,
+.agent-icon--hermes { display: inline-block; background: currentColor; mask: center / contain no-repeat; }
+.agent-icon--goose { mask-image: url('./logos/goose-mask.png'); }
+.agent-icon--hermes { mask-image: url('./logos/hermes-mask.png'); }
+
+/* Logo de omni: bloque sin encoger, toma el color del texto. */
+.omni-mark { flex: none; display: block; }

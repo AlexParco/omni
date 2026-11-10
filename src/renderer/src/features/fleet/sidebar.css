@@ -1,0 +1,99 @@
+/* Contenedor del sidebar: cabecera · buscar · navegación · Proyectos (lista) · Nuevo agente. */
+.sidebar {
+  width: var(--sidebar-w);
+  flex: none;
+  position: relative;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: 8px 0 0 0;
+}
+.sidebar[data-focus='terminal'] { opacity: 0.85; }
+
+/* A la altura del semáforo de macOS (titleBarStyle hiddenInset): la cabecera de la ventana vive aquí. */
+.sidebar__head {
+  height: var(--titlebar-h);
+  flex: none;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar__head .window-head { flex: 1; padding-right: 12px; }
+
+.sidebar__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  color: var(--text-3);
+  font-size: var(--fs-md);
+  border-bottom: 1px solid var(--border);
+}
+.sidebar__search:hover { color: var(--text); background: var(--hover); }
+.sidebar__search .kbd { margin-left: auto; }
+
+.sidebar__nav { display: flex; flex-direction: column; gap: 1px; padding: 8px; }
+
+.sidebar__section {
+  display: flex;
+  align-items: center;
+  padding: 10px 10px 2px 20px;
+  font-size: var(--fs-md);
+  font-weight: 500;
+  color: var(--text-3);
+}
+.sidebar__section .icon-btn { margin-left: auto; }
+.sidebar__section .icon-btn + .icon-btn { margin-left: 2px; }
+/* Marca de proyecto oculto (§3.5c), solo visible con "Mostrar proyectos ocultos". */
+.sidebar__hidden-mark { flex: none; color: var(--text-4); }
+
+/* Borde derecho arrastrable: cambia el ancho del sidebar. Misma pinta que un divisor del layout. */
+.sidebar__resizer { position: absolute; top: 0; bottom: 0; right: -4px; width: 9px; z-index: 3; cursor: col-resize; }
+.sidebar__resizer::after { content: ''; position: absolute; inset: 0; margin: auto; width: 3px; border-radius: 2px; transition: background-color 0.1s; }
+.sidebar__resizer:hover::after { background: var(--surface-3); }
+
+.sidebar__list { flex: 1; overflow-y: auto; padding: 2px 8px 12px; }
+.sidebar__list:focus { outline: 0; }
+.sidebar__group { margin-bottom: 4px; }
+.sidebar__hint { padding: 2px 12px 10px 24px; font-size: var(--fs-sm); color: var(--text-4); }
+
+.sidebar__empty {
+  padding: 24px 14px;
+  color: var(--text-3);
+  font-size: var(--fs-md);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+.sidebar__empty p { margin: 0; }
+.sidebar__time { color: var(--text-4); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; flex: none; min-width: 28px; text-align: right; }
+
+/* Subcarpeta (§3.5c): fila de una línea bajo el proyecto; con sus tabs forma un bloque como el de un worktree. */
+.folder { margin: 2px 0 4px; border-radius: 12px; }
+.folder[data-current] { background: var(--card-cur); }
+.folder__icon { flex: none; color: var(--text-3); }
+
+/* Worktree (M3): tarjeta de dos líneas bajo el proyecto. */
+.worktree { margin: 2px 0 6px; padding: 4px; border-radius: 12px; }
+.worktree[data-current] { background: var(--card-cur); }
+.worktree__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+.worktree__line { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.worktree__chip { font-size: var(--fs-xs); padding: 2px 8px; border-radius: 5px; background: var(--surface-2); color: var(--text-2); flex: none; }
+
+/* Hosts remotos (§3.26): icono de servidor; en ámbar si no hay conexión, tenue mientras conecta. */
+.sidebar__host-mark { flex: none; color: var(--text-3); }
+/* Sin conexión (caído o sin conectar) en ámbar, con el estado escrito en la ruta; conectando, tenue. */
+.sidebar__host-mark[data-host-state='error'], .folder[data-host-state='error'] .folder__icon,
+.sidebar__host-mark[data-host-state='disconnected'], .folder[data-host-state='disconnected'] .folder__icon,
+.folder[data-host-state='error'] .row__meta, .folder[data-host-state='disconnected'] .row__meta { color: var(--status-working); }
+.sidebar__host-mark[data-host-state='connecting'], .folder[data-host-state='connecting'] .folder__icon { color: var(--text-4); }
+.sidebar__hidden-mark { margin-left: 6px; vertical-align: -2px; }
+/* Ubicación (§3.5c): el nombre manda; la ruta gris cede primero y se corta con elipsis. */
+.folder .row__label { flex: 0 0 auto; max-width: 65%; }
+.folder .row__meta { flex: 1 1 0; min-width: 0; }
+/* Sin conexión el estado escrito no se corta (es corto y es lo que importa); cede el nombre. */
+.folder[data-host-state='error'] .row__meta, .folder[data-host-state='disconnected'] .row__meta, .folder[data-host-state='connecting'] .row__meta { flex: none; }
+.folder[data-host-state='error'] .row__label, .folder[data-host-state='disconnected'] .row__label, .folder[data-host-state='connecting'] .row__label { flex: 0 1 auto; }

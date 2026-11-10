@@ -1,0 +1,54 @@
+/* Pane de navegador: cabecera solo de iconos · cuerpo (hueco de la vista nativa, divisor y hueco de las
+ * DevTools). Solo contenedor; los controles son primitivos de ui/ (IconButton, UrlInput). */
+.browser {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-term);
+  outline: 0;
+}
+.browser__bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 8px;
+  flex: none;
+  background: var(--bg);
+}
+/* La URL toma todo lo que los iconos (26 px, icono de 16) no usan; un poco de aire a sus lados. */
+.browser__bar .url-bar { margin: 0 4px; }
+
+/* Cuerpo: página arriba y, con DevTools abiertas, el divisor y su hueco abajo. El markup lo cubre entero. */
+.browser__body { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+/* La página: contenedor con scroll para un viewport fijo que no cabe. */
+.browser__page { flex: 1; min-height: 0; display: flex; overflow: auto; }
+/* El hueco: main pinta la vista nativa justo encima. Vacío se ve como la terminal vacía. */
+.browser__view { position: relative; flex: 1; min-width: 0; min-height: 0; overflow: hidden; }
+/* Viewport fijo: el hueco toma el tamaño del preset, centrado; `margin: auto` lo deja al inicio si desborda, para que el scroll llegue. */
+.browser[data-viewport] .browser__view { flex: none; margin: auto; }
+.browser__view[data-blank]::before {
+  content: 'about:blank';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: var(--fs-sm) var(--mono);
+  color: var(--text-4);
+}
+/* Hueco de las DevTools acopladas: main pinta la segunda vista encima. */
+.browser__devtools { min-height: 0; background: var(--bg); }
+
+/* Lienzo de recorte: la captura ocupa el hueco; fuera de la selección cae un scrim, sin marcos. */
+.area { position: absolute; inset: 0; outline: 0; cursor: crosshair; overflow: hidden; }
+.area__shot { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.area__scrim { position: absolute; inset: 0; background: var(--scrim); }
+.area__sel { position: absolute; box-shadow: 0 0 0 100vmax var(--scrim); pointer-events: none; }
+/* Barra del paso de recorte (un `Toolbar`): centrada abajo, se esconde mientras se arrastra. */
+.area__bar { position: absolute; left: 12px; right: 12px; bottom: 14px; display: flex; justify-content: center; pointer-events: none; }
+.area__bar .toolbar { pointer-events: auto; gap: 6px; padding: 0 5px; cursor: default; max-width: 100%; }
+.area__bar .btn { height: 26px; padding: 0 9px; font-size: var(--fs-sm); flex: none; }
+.area[data-dragging] .area__bar { opacity: 0; pointer-events: none; }

@@ -1,0 +1,100 @@
+diff --git a/src/unix/pty.cc b/src/unix/pty.cc
+index 7b4b9e1f990fbf95b51528bb56dc9717f5b87532..06f9db90d242a74a232d2aed856fc6a7bb2b87e2 100644
+--- a/src/unix/pty.cc
++++ b/src/unix/pty.cc
+@@ -700,48 +700,54 @@ pty_posix_spawn(char** argv, char** env,
+       break;
+   }
+ 
++  // omni: fds a cerrar al salir (node-pty 1.1.0 fugaba low_fds[0] y el slave en cada spawn).
++  size_t opened = count < 3 ? count + 1 : 3;
++  int slave = -1;
++  int res;
++  posix_spawn_file_actions_t acts;
++  posix_spawnattr_t attrs;
++  bool acts_ready = false;
++
+   int flags = POSIX_SPAWN_CLOEXEC_DEFAULT |
+               POSIX_SPAWN_SETSIGDEF |
+               POSIX_SPAWN_SETSIGMASK |
+               POSIX_SPAWN_SETSID;
+   *master = posix_openpt(O_RDWR);
+   if (*master == -1) {
+-    return;
++    goto cleanup;
+   }
+ 
+-  int res = grantpt(*master) || unlockpt(*master);
++  res = grantpt(*master) || unlockpt(*master);
+   if (res == -1) {
+-    return;
++    goto cleanup;
+   }
+ 
+   // Use TIOCPTYGNAME instead of ptsname() to avoid threading problems.
+-  int slave;
+   char slave_pty_name[128];
+   res = ioctl(*master, TIOCPTYGNAME, slave_pty_name);
+   if (res == -1) {
+-    return;
++    goto cleanup;
+   }
+ 
+   slave = open(slave_pty_name, O_RDWR | O_NOCTTY);
+   if (slave == -1) {
+-    return;
++    goto cleanup;
+   }
+ 
+   if (termp) {
+     res = tcsetattr(slave, TCSANOW, termp);
+     if (res == -1) {
+-      return;
++      goto cleanup;
+     };
+   }
+ 
+   if (winp) {
+     res = ioctl(slave, TIOCSWINSZ, winp);
+     if (res == -1) {
+-      return;
++      goto cleanup;
+     }
+   }
+ 
+-  posix_spawn_file_actions_t acts;
+   posix_spawn_file_actions_init(&acts);
+   posix_spawn_file_actions_adddup2(&acts, slave, STDIN_FILENO);
+   posix_spawn_file_actions_adddup2(&acts, slave, STDOUT_FILENO);
+@@ -749,8 +755,8 @@ pty_posix_spawn(char** argv, char** env,
+   posix_spawn_file_actions_addclose(&acts, slave);
+   posix_spawn_file_actions_addclose(&acts, *master);
+ 
+-  posix_spawnattr_t attrs;
+   posix_spawnattr_init(&attrs);
++  acts_ready = true;
+   *err = posix_spawnattr_setflags(&attrs, flags);
+   if (*err != 0) {
+     goto done;
+@@ -775,11 +781,16 @@ pty_posix_spawn(char** argv, char** env,
+     *err = posix_spawn(pid, argv[0], &acts, &attrs, argv, env);
+   while (*err == EINTR);
+ done:
+-  posix_spawn_file_actions_destroy(&acts);
+-  posix_spawnattr_destroy(&attrs);
+-
+-  for (; count > 0; count--) {
+-    close(low_fds[count]);
++cleanup:
++  if (acts_ready) {
++    posix_spawn_file_actions_destroy(&acts);
++    posix_spawnattr_destroy(&attrs);
++  }
++  if (slave != -1) {
++    close(slave);
++  }
++  for (size_t i = 0; i < opened; i++) {
++    if (low_fds[i] != -1) close(low_fds[i]);
+   }
+ }
+ #endif

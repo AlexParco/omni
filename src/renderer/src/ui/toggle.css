@@ -1,0 +1,15 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 5px;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.toggle:hover { background: var(--hover); color: var(--text-2); }
+.toggle[data-on] { background: var(--surface-2); color: var(--text); }
+.toggle__count { font: var(--fs-xs) var(--mono); color: var(--text-4); }
+.toggle[data-on] .toggle__count { color: var(--text-3); }

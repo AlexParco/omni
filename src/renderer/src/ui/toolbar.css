@@ -1,0 +1,12 @@
+/* Pastilla flotante: relleno, sombra y radio; sin borde. Los hijos son primitivos (IconButton, ColorSwatch, Toggle). */
+.toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 36px;
+  padding: 0 6px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.toolbar__sep { width: 1px; height: 18px; margin: 0 5px; background: var(--border-2); flex: none; }

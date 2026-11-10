@@ -1,0 +1,4 @@
+/* Diálogo "Abrir en el editor": el campo y, debajo, el error de main; acciones a la derecha del pie. */
+.editor-path { padding: 14px 10px 6px; display: flex; flex-direction: column; gap: 8px; }
+.editor-path__error { font-size: var(--fs-sm); color: var(--danger); }
+.editor-path__actions { margin-left: auto; display: inline-flex; gap: 6px; }

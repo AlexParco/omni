@@ -1,0 +1,135 @@
+/* Widget To-do (ARCHITECTURE §3.12): modal de 400 × 560 al centro, al estilo de un widget de macOS. Solo contenedor; las piezas
+ * son primitivos de ui/ (Row, Checkbox, Button, IconButton, Badge, Dot, Kbd, Hint, TextInput, Empty).
+ * Columnas fijas para todo el widget: el contenido arranca a 24px del borde (icono, casilla, +, títulos
+ * de grupo) y el texto a 50px (etiqueta de la tarea, texto del campo). Sin bordes: solo aire y relleno. */
+
+/* Capa modal con el velo de los diálogos; el clic fuera la cierra. */
+.todo-overlay { position: fixed; inset: 0; z-index: 10; background: var(--scrim); }
+
+.todo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 400px;
+  height: 560px;
+  max-height: calc(100vh - 48px);
+  isolation: isolate;
+  overflow: clip;
+  background: var(--widget-bg);
+  backdrop-filter: blur(32px) saturate(1.4);
+  border-radius: 22px;
+  box-shadow: var(--widget-shadow);
+  display: flex;
+  flex-direction: column;
+  outline: 0;
+  color: var(--text-2);
+  transform: translate(-50%, -50%);
+  animation: todo-in 0.18s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+/* Aparece como un widget: crece un poco desde el centro. Sin animación si el sistema lo pide. */
+@keyframes todo-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .todo { animation: none; }
+}
+
+/* Cabecera de widget: el título a la izquierda y el número de pendientes en grande a la derecha, con
+ * qué cuenta debajo. Rejilla de dos columnas a dos bordes. */
+.todo__head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  row-gap: 6px;
+  flex: none;
+  padding: 18px 20px 14px 24px;
+}
+.todo__count { justify-self: end; font-size: var(--fs-xl); line-height: 24px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.todo__title { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-xl); font-weight: 600; color: var(--text); }
+.todo__pending { grid-column: 2; justify-self: end; font-size: var(--fs-sm); color: var(--text-3); }
+
+/* Nueva tarea: una fila más (36px, relleno suave), con + en la columna de las casillas y el texto en
+ * la de las etiquetas. La tecla de la derecha dice qué hace ahora: A para llegar, ⏎ para crear. */
+.todo__add {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  flex: none;
+  margin: 0 8px 4px;
+  padding: 0 12px 0 16px;
+  border-radius: 10px;
+  background: var(--widget-row);
+  color: var(--text-3);
+}
+.todo__add > svg { flex: none; width: 16px; }
+.todo__add .text-input { flex: 1; height: 36px; padding: 0; background: transparent; font-size: var(--fs-md); }
+.todo__add .text-input:focus-visible { background: transparent; }
+.todo__add:focus-within { color: var(--text-2); }
+
+/* Lista: aire de 8px a los lados; las filas (nivel 1, sangría 24) dejan la casilla en 32 y el texto en 58. */
+.todo__list { flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable; padding: 4px 8px 8px; display: flex; flex-direction: column; }
+.todo__list:focus { outline: 0; }
+.todo__list .row + .row { margin-top: 1px; }
+.todo__list .row[data-level='1'] { padding-left: 16px; border-radius: 10px; }
+.todo__list .row[data-cursor] { background: var(--widget-row); }
+/* La fila con cursor se despliega: el texto entero en varias líneas, el resto de filas sigue en una.
+ * Relleno 8 + línea 20 + 8 = 36, el mismo alto de una fila normal, así una tarea corta no salta.
+ * Casilla (16) y botones (26) se centran en la primera línea (centro a 18px). */
+.todo__list .row[data-cursor] { align-items: flex-start; padding-top: 8px; padding-bottom: 8px; }
+.todo__list .row[data-cursor] .row__label { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 20px; text-overflow: clip; }
+.todo__list .row[data-cursor] .checkbox { margin-top: 2px; }
+.todo__list .row[data-cursor] .row__actions { margin-top: -3px; margin-bottom: -3px; }
+
+/* Hecha: texto tachado y apagado; la casilla ya lo dice. */
+.todo__list .row[data-status='done'] .row__label { text-decoration: line-through; color: var(--text-4); }
+
+/* Acciones de la fila: en el widget ocupan su sitio (la etiqueta se acorta) en vez de flotar sobre el
+ * texto; aparecen con el cursor o el mouse y entonces esconden el distintivo del agente. */
+.todo__list .row__actions { position: static; transform: none; display: none; margin-left: auto; gap: 2px; opacity: 1; pointer-events: auto; }
+.todo__list .row[data-cursor] .row__actions { display: flex; }
+.todo__list .row[data-cursor] .row__end { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .todo__list .row:hover .row__actions { display: flex; }
+  .todo__list .row:hover .row__end { display: none; }
+}
+
+/* Título del grupo Hecho a dos bordes: nombre junto al chevron (en la columna de las casillas), conteo a
+ * la derecha alineado con el final de las filas. */
+.todo__group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 14px 12px 6px 16px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-3);
+  text-align: left;
+}
+.todo__group:first-child { padding-top: 12px; }
+.todo__group-name { flex: 1; }
+.todo__group .row__count { margin-left: 0; }
+/* Hecho se pliega: el chevron ocupa la columna de la casilla, como en el sidebar. */
+button.todo__group { cursor: default; padding-left: 17px; }
+button.todo__group svg { color: var(--text-4); flex: none; }
+@media (hover: hover) and (pointer: fine) {
+  button.todo__group:hover { color: var(--text-2); }
+}
+
+/* Sin pendientes habiendo hechas: una línea en gris en la columna del texto, no un estado vacío entero. */
+.todo__none { margin: 0; padding: 6px 12px 6px 42px; font-size: var(--fs-md); color: var(--text-4); }
+
+/* Pie: atajos que no tienen botón en la fila, en una línea. */
+.todo__foot {
+  display: flex;
+  gap: 14px;
+  flex: none;
+  padding: 10px 20px 16px 24px;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.todo__empty-hint { display: inline-flex; align-items: center; gap: 6px; }

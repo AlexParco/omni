@@ -1,0 +1,27 @@
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--status-done);
+  transition: background-color 0.2s;
+}
+/* Trabajando: un aro que gira (se lee como "en curso" sin leyenda); quieto si el sistema pide menos movimiento. */
+.dot[data-status='working'] {
+  /* 9px con -1px de margen: el arco se lee mejor y la columna de puntos no se mueve. */
+  width: 9px;
+  height: 9px;
+  margin: -1px;
+  background: transparent;
+  border: 1.5px solid color-mix(in srgb, var(--status-working) 30%, transparent);
+  border-top-color: var(--status-working);
+  animation: dot-spin 0.8s linear infinite;
+}
+@keyframes dot-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .dot[data-status='working'] { animation: none; border-top-color: var(--status-working); }
+}
+.dot[data-status='idle'] { background: var(--status-ready); }
+.dot[data-status='question'] { background: var(--status-question); }
+.dot[data-status='unread'] { background: var(--status-unread); }
+.dot[data-status='empty'] { background: transparent; border: 1px solid var(--text-4); }

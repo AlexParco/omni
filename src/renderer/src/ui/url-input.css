@@ -1,0 +1,28 @@
+.url-bar {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: text;
+}
+.url-bar:hover { background: var(--surface-2); }
+.url-bar[data-editing] { background: var(--surface-2); }
+.url-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--text-2);
+  font: var(--fs-sm) var(--mono);
+  text-overflow: ellipsis;
+}
+.url-input:focus { color: var(--text); }
+.url-input::placeholder { color: var(--text-4); font-family: var(--font); }
+.url-input::selection { background: var(--surface-3); }

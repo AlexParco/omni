@@ -1,0 +1,19 @@
+.select { position: relative; display: inline-flex; align-items: center; }
+.select__input {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 26px;
+  min-width: 160px;
+  padding: 0 28px 0 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font: var(--fs-sm) var(--font);
+  outline: 0;
+}
+.select__input:hover { background: var(--surface-3); }
+.select__input:focus-visible { outline: 2px solid var(--locate); outline-offset: -2px; }
+.select__input option { background: var(--surface); color: var(--text); }
+.select__chevron { position: absolute; right: 8px; color: var(--text-3); pointer-events: none; }
+.select[data-disabled] { opacity: 0.4; }

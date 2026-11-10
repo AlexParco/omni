@@ -1,0 +1,37 @@
+/* Widget Uso (ARCHITECTURE §3.25): el marco es `ui/Widget`. Una tarjeta de relleno suave por agente, sin
+ * bordes. Columnas fijas: icono a 24px del borde; nombre, topes y notas a 50px (icono 16 + aire 10). */
+
+.usage__list { flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable; padding: 4px 8px 8px; display: flex; flex-direction: column; gap: 8px; }
+
+.usage__agent { flex: none; padding: 12px 14px 12px 16px; border-radius: 12px; background: var(--widget-row); }
+
+/* Cabecera de la tarjeta: icono, nombre y plan; lo de hoy a la derecha. */
+.usage__head { display: flex; align-items: center; gap: 10px; height: 20px; }
+.usage__name { font-size: var(--fs-md); font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.usage__today { margin-left: auto; font: 500 var(--fs-md) / 20px var(--mono); color: var(--text); font-variant-numeric: tabular-nums; }
+/* Sin uso hoy: una línea, el agente y el texto en gris; la tarjeta solo crece si tiene topes. */
+.usage__agent[data-idle] .usage__name { color: var(--text-2); font-weight: 400; }
+.usage__agent[data-idle] .usage__today { font: var(--fs-sm) / 20px var(--font); color: var(--text-2); }
+
+/* Topes: etiqueta, barra, porcentaje y reinicio en columnas iguales para todos los agentes. */
+.usage__limits { display: flex; flex-direction: column; gap: 4px; margin: 10px 0 0 26px; }
+.usage__limit { display: grid; grid-template-columns: 48px 1fr 36px 64px; align-items: center; column-gap: 10px; height: 20px; }
+.usage__label { font-size: var(--fs-sm); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.usage__pct { font: var(--fs-sm) var(--mono); color: var(--text-2); text-align: right; font-variant-numeric: tabular-nums; }
+.usage__limit[data-level='high'] .usage__pct { color: var(--status-question-text); }
+.usage__limit[data-level='full'] .usage__pct { color: var(--danger); font-weight: 600; }
+.usage__reset { font-size: var(--fs-sm); color: var(--text-2); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Notas: tokens de hoy y antigüedad de los topes; por qué no hay topes. Todo lo secundario va en
+ * --text-2: sobre la tarjeta, --text-3 da 3,9:1 y el texto de 12px necesita 4,5:1. */
+.usage__meta,
+.usage__note { margin: 8px 0 0 26px; font-size: var(--fs-sm); line-height: 16px; color: var(--text-2); }
+.usage__note { margin-top: 4px; }
+
+/* Agentes sin rastro en la máquina: una línea al final, sin tarjeta. */
+.usage__missing { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 6px 14px 4px 16px; font-size: var(--fs-sm); color: var(--text-4); }
+.usage__missing-title { width: 100%; font-weight: 600; color: var(--text-3); }
+.usage__missing-agent { display: inline-flex; align-items: center; gap: 6px; }
+.usage__missing-agent .agent-icon { color: var(--text-4); }
+
+.usage__measured { margin-left: auto; color: var(--text-3); }

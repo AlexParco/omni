@@ -1,0 +1,7 @@
+/* Diálogos de ubicaciones y servidores (§3.5c, §3.26): mismo ritmo que los de worktrees. */
+.hosts-dialog { padding: 14px 10px 6px; display: flex; flex-direction: column; gap: 8px; }
+.hosts-dialog__error { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--danger); white-space: pre-wrap; }
+.hosts-dialog__note { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-4); }
+.hosts-dialog__actions { margin-left: auto; display: inline-flex; gap: 6px; }
+.hosts-dialog__list { display: flex; flex-direction: column; padding: 2px 4px 8px; max-height: 260px; overflow: auto; }
+.hosts-dialog__icon { flex: none; color: var(--text-3); }

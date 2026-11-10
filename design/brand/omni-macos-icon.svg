@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><title>omni</title>
+<defs><linearGradient id="t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#262626"/><stop offset="1" stop-color="#0a0a0a"/></linearGradient></defs>
+<rect x="100" y="100" width="824" height="824" rx="185" fill="url(#t)"/>
+<path fill="#fafafa" d="M487.82,305.09A208.32,208.32 0 0 0 487.82,718.91ZM536.18,305.09L536.18,461.78A26.04,26.04 0 0 0 562.22,487.82L718.91,487.82A208.32,208.32 0 0 0 536.18,305.09ZM536.18,718.91L536.18,562.22A26.04,26.04 0 0 1 562.22,536.18L718.91,536.18A208.32,208.32 0 0 1 536.18,718.91Z"/></svg>

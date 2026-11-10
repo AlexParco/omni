@@ -1,0 +1,9 @@
+/* Barra de cuota: pista de 4px en el gris de las teclas, relleno en el gris del texto; naranja y rojo
+ * solo cuando el tope aprieta (el porcentaje siempre va escrito al lado). */
+.meter { position: relative; display: block; height: 4px; border-radius: 2px; background: var(--surface-3); overflow: hidden; min-width: 0; }
+.meter__fill { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: var(--text-2); transition: width 0.3s ease-out; }
+.meter[data-level='high'] .meter__fill { background: var(--status-question); }
+.meter[data-level='full'] .meter__fill { background: var(--danger); }
+@media (prefers-reduced-motion: reduce) {
+  .meter__fill { transition: none; }
+}

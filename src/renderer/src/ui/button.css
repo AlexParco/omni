@@ -1,0 +1,44 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  border: 0;
+  background: var(--surface-2);
+  font-size: var(--fs-sm);
+  color: var(--text);
+}
+.btn svg { color: var(--text-2); }
+.btn:hover { background: var(--surface-3); }
+.btn:disabled { opacity: 0.4; }
+.btn[data-on] { background: var(--surface-3); }
+.btn[data-variant='primary'] {
+  background: var(--primary);
+  color: var(--on-primary);
+  font-weight: 500;
+}
+.btn[data-variant='primary']:hover { background: var(--text); }
+.btn[data-variant='primary'] svg { color: var(--on-primary); }
+.btn[data-variant='primary'] .kbd { background: var(--on-primary-soft); color: var(--text-4); }
+.btn[data-variant='danger'] { color: var(--danger); }
+.btn[data-variant='danger'] svg { color: var(--danger); }
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  color: var(--text-3);
+  flex: none;
+}
+.icon-btn[data-size='sm'] { width: 22px; height: 22px; }
+.icon-btn[data-size='auto'] { width: auto; padding: 0 3px; }
+.icon-btn:hover { background: var(--surface-3); color: var(--text); }
+.icon-btn[data-on] { background: var(--surface-2); color: var(--text); }
+.icon-btn[data-primary] { background: var(--surface-2); color: var(--text); }
+.icon-btn[data-primary]:hover { background: var(--surface-3); }
+.icon-btn:disabled { opacity: 0.35; pointer-events: none; }

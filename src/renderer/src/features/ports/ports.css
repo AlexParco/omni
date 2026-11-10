@@ -1,0 +1,77 @@
+/* Widget Puertos (ARCHITECTURE §3.24): el marco es `ui/Widget`; aquí van filtro y lista, con primitivos de
+ * ui/ (Row multiline, Badge, IconButton, Kbd, Hint, TextInput, Empty). Columnas fijas: el contenido arranca
+ * a 24px del borde y el texto a 74px (puerto de 48 + aire de 10). Sin bordes: solo aire y relleno. */
+
+/* Filtro: una fila de 36px con relleno suave, la lupa en la columna de los puertos. */
+.ports__filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  flex: none;
+  margin: 0 8px 4px;
+  padding: 0 12px 0 16px;
+  border-radius: 10px;
+  background: var(--widget-row);
+  color: var(--text-3);
+}
+.ports__filter > svg { flex: none; width: 16px; }
+.ports__filter .text-input { flex: 1; height: 36px; padding: 0; background: transparent; font-size: var(--fs-md); }
+.ports__filter .text-input:focus-visible { background: transparent; }
+.ports__filter:focus-within { color: var(--text-2); }
+
+/* Lista: filas de dos líneas (nombre y tiempo; repo · rama y puertos de más). El puerto, en mono y
+ * tabular, ocupa una columna fija alineada con la primera línea. */
+.ports__list { flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable; padding: 4px 8px 8px; display: flex; flex-direction: column; }
+.ports__list:focus { outline: 0; }
+.ports__list .row + .row { margin-top: 1px; }
+/* La lista hace scroll: las filas no se encogen (sin esto la columna flex las aplasta y la segunda línea pisa la fila de abajo). */
+.ports__list > .row { flex: none; }
+.ports__list .row[data-multiline] { padding: 8px 12px 8px 16px; border-radius: 10px; }
+.ports__list .row[data-cursor] { background: var(--widget-row); }
+.ports__port {
+  flex: none;
+  width: 48px;
+  font: 600 var(--fs-md) / 20px var(--mono);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.ports__list .row__line[data-muted] { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.ports__list .row[data-status='stopping'] .row__line[data-muted] { color: var(--danger); }
+
+/* Acciones de la fila: ocupan su sitio (la etiqueta se acorta) y se centran en la primera línea. */
+.ports__list .row__actions { position: static; transform: none; display: none; margin: -3px 0 -3px auto; gap: 2px; opacity: 1; pointer-events: auto; }
+.ports__list .row[data-cursor] .row__actions { display: flex; }
+.ports__list .row[data-cursor] .row__end { display: none; }
+.ports__list .row__end { line-height: 20px; }
+@media (hover: hover) and (pointer: fine) {
+  .ports__list .row:hover .row__actions { display: flex; }
+  .ports__list .row:hover .row__end { display: none; }
+}
+
+/* Título del grupo Sistema: plegable, el chevron en la columna de los puertos y el conteo a la derecha. */
+.ports__group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 14px 12px 6px 17px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-3);
+  text-align: left;
+  cursor: default;
+}
+.ports__group svg { color: var(--text-4); flex: none; }
+.ports__group-name { flex: 1; }
+.ports__group .row__count { margin-left: 0; }
+/* Títulos fijos (En <proyecto>, Otros): sin chevron, el nombre en la columna de los puertos. */
+.ports__group[data-static] { padding-left: 16px; }
+.ports__group[data-static]:first-child { padding-top: 8px; }
+@media (hover: hover) and (pointer: fine) {
+  button.ports__group:hover { color: var(--text-2); }
+}
+
+.ports__none { margin: 0; padding: 6px 12px 6px 16px; font-size: var(--fs-md); color: var(--text-4); }
+
+.ports__notice { overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }

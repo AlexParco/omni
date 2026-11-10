@@ -1,0 +1,112 @@
+/*
+ * Pane de editor (ARCHITECTURE §3.19). Medidas: cabecera 28px; gutter = errores (14px) + números
+ * (mín. 34px) + barra del diff (4px, de @codemirror/merge); fuente mono al tamaño de la terminal (`--editor-font-size`), interlínea 1.5;
+ * árbol lateral 240px. Colores solo por tokens; sin marcos para cursor ni selección.
+ */
+.editor {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-term);
+}
+.panes:has(.pane[data-focus='live']) .pane:not([data-focus='live']) .editor__body { opacity: var(--pane-dim); }
+
+/* Cabecera: cambios del agente y sus acciones a la izquierda; lenguaje, avisos y modo vim a la derecha. */
+.editor__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 28px;
+  padding: 0 6px 0 10px;
+  flex: none;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  background: var(--bg);
+  min-width: 0;
+  overflow: hidden;
+}
+.editor__changes { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); white-space: nowrap; }
+.editor__changes[data-muted] { color: var(--text-4); }
+.editor__changes-pos { font: var(--fs-xs) var(--mono); color: var(--text-4); font-variant-numeric: tabular-nums; }
+/* Angosto (split): las acciones no se parten; lo que cede es el nombre del lenguaje/servidor, con elipsis. */
+.editor__actions { display: inline-flex; gap: 2px; flex: none; white-space: nowrap; }
+/* Resumen de errores de tsc/eslint: icono (círculo error, triángulo aviso) + texto; clic va al siguiente. */
+.editor__diagnostics { flex: none; display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 6px; border-radius: var(--radius-sm); white-space: nowrap; cursor: default; }
+.editor__diagnostics[data-severity='error'] { color: var(--diff-del-text); }
+.editor__diagnostics[data-severity='warning'] { color: var(--status-working); }
+@media (hover: hover) and (pointer: fine) {
+  .editor__diagnostics:hover { background: var(--hover); }
+}
+.editor__actions .btn { height: 22px; padding: 0 7px; font-size: var(--fs-xs); }
+.editor__end { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; flex: 0 1 auto; min-width: 0; }
+.editor__end > .badge { flex: none; }
+.editor__end .badge { max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+.editor__lang { font: var(--fs-xs) var(--mono); color: var(--text-4); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* Con servidor de lenguaje el nombre lleva su versión ("TypeScript 5.9.3"); caído, en ámbar. */
+.editor__lang[data-lsp='ready'] { color: var(--text-3); }
+.editor__lang[data-lsp='error'] { color: var(--status-working); }
+
+/* Cuerpo: árbol opcional a la izquierda y el hueco de CodeMirror. */
+.editor__body { flex: 1; min-height: 0; display: flex; }
+.editor__host { position: relative; flex: 1; min-width: 0; min-height: 0; }
+.editor__view { position: absolute; inset: 0; }
+.editor__view .editor-root, .editor__view .cm-editor { height: 100%; }
+.editor__view .cm-editor { outline: none; }
+.editor__view .cm-scroller { overflow: auto; }
+.editor__error { position: absolute; inset: 0; display: flex; background: var(--bg-term); }
+
+/* Compositor bajo el hunk: mismo molde que el de la revisión (relleno suave, sin acento lateral). */
+.editor__composer-slot { padding: 4px 16px 8px 10px; }
+.editor__composer {
+  max-width: 600px;
+  padding: 8px 8px 6px 12px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  white-space: normal;
+}
+.editor__composer-head { font: var(--fs-xs) var(--mono); color: var(--text-3); padding-bottom: 6px; }
+.editor__composer-foot { display: flex; gap: 14px; padding: 6px 2px 0; font-size: var(--fs-xs); color: var(--text-3); }
+
+/* Árbol lateral (⌘E): lista navegable con `Row`; carpetas a nivel 1, archivos a nivel 2. */
+.editor__tree {
+  width: 240px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--bg);
+  outline: none;
+}
+.editor__tree-head { padding: 8px 12px 4px; font: var(--fs-xs) var(--mono); color: var(--text-4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.editor__tree-rows { flex: 1; min-height: 0; overflow: auto; padding: 0 6px 6px; display: flex; flex-direction: column; }
+.editor__tree .row { min-height: 28px; font-size: var(--fs-sm); }
+.editor__tree .row[data-level='1'] { padding-left: 10px; }
+.editor__tree .row[data-level='2'] { margin-left: 0; padding-left: 26px; min-height: 28px; font-size: var(--fs-sm); }
+/* Dentro del árbol el cursor siempre se ve: el teclado está aquí, no en la lista. */
+.editor__tree .row[data-cursor] { background: var(--surface-2); color: var(--text); }
+.editor__tree .row[data-active]:not([data-cursor]) { background: var(--active-soft); }
+
+/* Resaltado de sintaxis por clases (`tok-*`): los colores salen de los tokens. */
+.tok-comment { color: var(--text-3); font-style: italic; }
+.tok-keyword { color: var(--ai); }
+.tok-atom { color: var(--status-working); }
+.tok-literal { color: var(--status-working); }
+.tok-string { color: var(--diff-add-text); }
+.tok-regexp { color: var(--status-question-text); }
+.tok-definition-variablename { color: var(--locate); }
+.tok-local-variablename { color: var(--text); }
+.tok-typename { color: var(--chip-6); }
+.tok-classname { color: var(--chip-6); }
+.tok-special-variablename { color: var(--locate); }
+.tok-definition-propertyname { color: var(--text-2); }
+.tok-meta { color: var(--text-3); }
+.tok-link { color: var(--locate); text-decoration: underline; }
+.tok-heading { color: var(--text); font-weight: 600; }
+.tok-emphasis { font-style: italic; }
+.tok-strong { font-weight: 600; }
+.tok-strikethrough { text-decoration: line-through; }
+.tok-invalid { color: var(--danger); }

@@ -1,0 +1,12 @@
+packages:
+  - .
+
+allowBuilds:
+  electron: true
+  # electron-winstaller lo arrastra electron-builder (solo Windows): sin build scripts.
+  electron-winstaller: false
+  esbuild: true
+  node-pty: true
+
+patchedDependencies:
+  node-pty@1.1.0: patches/node-pty@1.1.0.patch

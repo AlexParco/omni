@@ -1,0 +1,210 @@
+/*
+ * Broadcast (ARCHITECTURE §3.18, canvas 04): reemplaza el área de panes. Solo contenedor: nav interno
+ * de 260 px con las rondas (Row multiline), columna principal con cabecera de 64 px (título + línea
+ * mono + acciones), bloque del prompt, tarjetas en fila (`Candidate`, mismo ancho) y pie de atajos.
+ * Las piezas son primitivos de ui/ (Row, Dot, Badge, Kbd, Hint, Button, Toggle, TextArea, Empty) y
+ * aquí no se restyla ninguno. Sin marcos ni acentos para cursor o elegido: solo relleno.
+ */
+.broadcast {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  outline: 0;
+}
+
+/* Nav interno: cabecera 48px (como la del sidebar), rondas como filas de dos líneas y "Nueva ronda" al pie. */
+.broadcast__nav {
+  width: 260px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+}
+.broadcast__nav-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  flex: none;
+  padding: 0 16px 0 20px;
+  border-bottom: 1px solid var(--border);
+}
+.broadcast__nav-title { flex: 1; font-size: var(--fs-lg); font-weight: 500; color: var(--text); }
+.broadcast__rounds { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; padding: 4px 8px 8px; }
+.broadcast__rounds:focus { outline: 0; }
+.broadcast__rounds-empty { margin: 0; padding: 12px 12px 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-4); }
+/* Tecla, etiqueta y, a la derecha, el proyecto en mono. */
+.broadcast__new {
+  margin: 4px 12px 12px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-2);
+  font-size: var(--fs-md);
+  border-radius: 8px;
+  background: var(--kbd-bg);
+}
+.broadcast__new:hover { background: var(--surface-2); color: var(--text); }
+.broadcast__new:disabled { opacity: 0.5; }
+.broadcast__new > span { white-space: nowrap; flex: none; }
+.broadcast__new-where { margin-left: auto; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; font: var(--fs-xs) var(--mono); color: var(--text-4); }
+
+/* Columna principal. */
+.broadcast__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Cabecera: dos líneas, 64 px en total (como la revisión). */
+.broadcast__head {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  height: 64px;
+  padding: 0 16px 0 20px;
+  border-bottom: 1px solid var(--border);
+}
+.broadcast__head-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.broadcast__title { min-width: 0; font-size: var(--fs-lg); font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.broadcast__state { flex: none; font-size: var(--fs-sm); color: var(--text-3); }
+.broadcast__state[data-state='running'] { color: var(--status-working); }
+.broadcast__state[data-state='merged'] { color: var(--status-ready); }
+.broadcast__actions { margin-left: auto; display: flex; align-items: center; gap: 6px; flex: none; }
+.broadcast__head-line { font: var(--fs-xs) var(--mono); color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 15px; }
+
+.broadcast__error { flex: none; margin: 0; padding: 8px 20px; font-size: var(--fs-sm); line-height: 1.5; color: var(--status-question-text); background: var(--hover-soft); }
+
+/* Prompt: bloque en `--surface`, mono 12/1.5; plegado muestra dos líneas (36 px), `P` lo despliega. */
+.broadcast__prompt {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 12px 20px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: default;
+}
+.broadcast__prompt-text {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font: var(--fs-sm)/1.5 var(--mono);
+  color: var(--text-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 36px;
+  overflow: hidden;
+  user-select: text;
+}
+.broadcast__prompt[data-open] .broadcast__prompt-text { max-height: 240px; overflow: auto; }
+.broadcast__prompt .kbd { flex: none; margin-top: 1px; }
+
+/* Tarjetas: una fila con scroll horizontal si no caben; cada una con el mismo ancho (flex 1 1 0). */
+.broadcast__cards {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  overflow: auto;
+}
+.broadcast__cards:focus { outline: 0; }
+
+/* Tarjeta de un candidato: `--surface`; elegida `--surface-2`; bajo el cursor un tono más fuerte (`--surface-3`), como Row activa/cursor (§3.8). Nunca borde. */
+.candidate {
+  flex: 1 1 0;
+  min-width: 220px;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: default;
+}
+.candidate[data-chosen] { background: var(--surface-2); }
+.candidate[data-cursor] { background: var(--surface-3); }
+.candidate[data-cursor] .candidate__name { color: var(--text); }
+
+/* Cabecera: punto, nombre del worktree, badge del agente, ★ elegido y el tiempo al extremo (24 px). */
+.candidate__head { display: flex; align-items: center; gap: 8px; min-height: 24px; min-width: 0; }
+.candidate__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-md); font-weight: 500; color: var(--text-2); }
+.candidate__chosen { flex: none; font-size: var(--fs-xs); font-weight: 500; color: var(--status-working); white-space: nowrap; }
+.candidate__time { flex: none; margin-left: auto; font-size: var(--fs-sm); color: var(--text-4); font-variant-numeric: tabular-nums; }
+
+/* Estado del agente en texto, con su color (trabajando ámbar, pregunta naranja, listo gris, sin agente gris apagado). */
+.candidate__status { font-size: var(--fs-sm); color: var(--text-3); }
+.candidate__status[data-status='working'] { color: var(--status-working); }
+.candidate__status[data-status='question'] { color: var(--status-question-text); }
+.candidate__status[data-status='none'] { color: var(--text-4); }
+
+/* Pares etiqueta · valor en dos columnas: etiqueta gris apagada, valor mono tabular. */
+.candidate__pairs {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 4px 10px;
+  align-items: baseline;
+  font-size: var(--fs-sm);
+}
+.candidate__key { color: var(--text-4); }
+.candidate__value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--fs-sm) var(--mono); color: var(--text-2); font-variant-numeric: tabular-nums; }
+.candidate__value[data-tone='pass'] { color: var(--status-ready); }
+.candidate__value[data-tone='fail'] { color: var(--danger); }
+.candidate__value[data-tone='running'] { color: var(--status-working); }
+.candidate__value[data-tone='deps'] { color: var(--status-question-text); }
+.candidate__value[data-tone='muted'] { color: var(--text-4); }
+
+/* Resumen: última línea de la terminal, una línea mono con elipsis. */
+.candidate__summary { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--fs-sm)/18px var(--mono); color: var(--text-3); }
+.candidate__summary[data-empty] { color: var(--text-4); }
+
+/* Archivos: lista mono de 18 px por línea, ruta con elipsis y `+a −d` a la derecha, alineado entre filas. */
+.candidate__files { display: flex; flex-direction: column; gap: 0; margin: 0; padding: 0; list-style: none; }
+.candidate__file { display: flex; align-items: center; gap: 10px; min-width: 0; line-height: 18px; font: var(--fs-xs)/18px var(--mono); color: var(--text-3); }
+.candidate__path { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.candidate__file[data-dep] .candidate__path { color: var(--status-question-text); }
+.candidate__stat { flex: none; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.candidate__stat-add { color: var(--diff-add-text); }
+.candidate__stat-del { color: var(--diff-del-text); margin-left: 6px; }
+.candidate__more { font: var(--fs-xs)/18px var(--mono); color: var(--text-4); }
+
+/* Pie: los atajos de la capa `broadcast`; a la derecha, el aviso o el error. */
+.broadcast__foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  flex: none;
+  min-height: 36px;
+  padding: 8px 16px 8px 20px;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  border-top: 1px solid var(--border);
+}
+.broadcast__foot-end { margin-left: auto; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; }
+.broadcast__foot-end[data-error] { color: var(--danger); }
+
+/* Diálogo "Nueva ronda": prompt, chips de agentes con `+` para repetir, línea de tests y acciones a la derecha del pie. */
+.broadcast-dialog { padding: 14px 10px 6px; display: flex; flex-direction: column; gap: 12px; }
+.broadcast-dialog__label { font-size: var(--fs-sm); font-weight: 500; color: var(--text-3); }
+.broadcast-dialog__section { display: flex; flex-direction: column; gap: 6px; }
+.broadcast-dialog__agents { display: flex; flex-wrap: wrap; gap: 6px 10px; }
+.broadcast-dialog__agent { display: inline-flex; align-items: center; gap: 2px; }
+.broadcast-dialog__tests { display: flex; align-items: center; gap: 8px; min-height: 24px; font-size: var(--fs-sm); color: var(--text-3); }
+.broadcast-dialog__tests-cmd { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--fs-sm) var(--mono); color: var(--text-2); }
+.broadcast-dialog__tests-cmd[data-empty] { color: var(--text-4); font-family: var(--font); }
+.broadcast-dialog__note { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-4); }
+.broadcast-dialog__actions { margin-left: auto; display: inline-flex; gap: 6px; }

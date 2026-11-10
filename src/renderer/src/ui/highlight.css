@@ -1,0 +1,2 @@
+/* Coincidencia de búsqueda: sin fondo, solo el texto en blanco y un peso más. */
+.highlight mark { background: none; color: var(--text); font-weight: 500; }

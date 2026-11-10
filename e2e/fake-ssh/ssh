@@ -1,0 +1,322 @@
+#!/usr/bin/env python3
+# OpenSSH falso para tests y e2e: corre el comando "remoto" EN ESTE Mac, tal cual lo haría sshd
+# (argumentos unidos con un espacio y pasados a `/bin/sh -c`), así un error de comillado se nota.
+#
+# Variables:
+#   FAKE_SSH_LOG=<archivo>   agrega el argv de cada invocación (una línea JSON) al archivo.
+#   FAKE_SSH_FAIL=<tipo>     simula un fallo con el stderr real de OpenSSH y código 255:
+#                            auth | unreachable | refused | resolve | hostkey | hostkey-changed | timeout
+#   FAKE_SSH_NO_MASTER=1     `-O check` responde que no hay master (como sin socket).
+#   FAKE_SSH_HOME=<carpeta>  carpeta donde arranca el comando (sshd arranca en $HOME); por defecto $HOME.
+#   FAKE_SSH_REMOTE_SHELL=<shell>  valor de $SHELL para el comando (el shell de login "remoto").
+#   FAKE_SSH_LOGIN_SHELL=<shell>   shell con el que "sshd" corre la línea (`<shell> -c <línea>`), como
+#                                  el shell de passwd del usuario; por defecto /bin/sh. Sirve para
+#                                  probar que omni no depende de que sea POSIX (csh, fish).
+#   FAKE_SSH_DROP_FILE=<archivo>   con `-tt` (una terminal), mientras ese archivo exista la conexión
+#                                  "se cae": se mata el comando remoto y ssh sale con 255, como al
+#                                  cerrar la tapa sin dtach en el host. Si existe al arrancar, cae al toque.
+import json
+import os
+import signal
+import sys
+import time
+
+# Mismo getopt que ssh.c: letras con argumento y sin argumento.
+WITH_ARG = set('BbcDEeFIiJLlmOoPpQRSWw')
+NO_ARG = set('1246AaCfGgKkMNnqsTtVvXxYy')
+
+
+def fail(msg, code=255):
+    sys.stderr.write(msg + '\n')
+    sys.exit(code)
+
+
+def parse(argv):
+    opts = {'o': [], 'flags': [], 'p': None, 'l': None, 'O': None, 'L': None, 'R': None}
+    host = None
+    rest = []
+    i = 0
+    terminated = False
+    while i < len(argv):
+        a = argv[i]
+        if host is not None and terminated:
+            rest = argv[i:]
+            break
+        if a == '--':
+            terminated = True
+            i += 1
+            if host is not None:
+                rest = argv[i:]
+                break
+            continue
+        if a.startswith('-') and len(a) > 1 and not terminated:
+            j = 1
+            while j < len(a):
+                c = a[j]
+                if c in WITH_ARG:
+                    val = a[j + 1:]
+                    if val == '':
+                        i += 1
+                        if i >= len(argv):
+                            fail('option requires an argument -- ' + c)
+                        val = argv[i]
+                    if c == 'o':
+                        opts['o'].append(val)
+                    elif c in ('p', 'l', 'O', 'L', 'R'):
+                        opts[c] = val
+                    break
+                if c in NO_ARG:
+                    opts['flags'].append(c)
+                    j += 1
+                    continue
+                fail('unknown option -- ' + c)
+            i += 1
+            continue
+        if host is None:
+            host = a
+            i += 1
+            continue
+        # Primer argumento tras el destino que no es opción: empieza el comando (como ssh.c).
+        rest = argv[i:]
+        break
+    return opts, host, rest
+
+
+def forward(op, spec):
+    """`-O forward|cancel -L [bind:]lport:host:rport`. El "remoto" es este Mac: un proxy TCP real de
+    lport a host:rport, en segundo plano, como el que abre el ControlMaster. Su pid queda en un archivo
+    por lport para que `cancel` lo pare."""
+    import signal
+    import socket
+    import threading
+    if not spec:
+        fail('-O %s requiere -L' % op)
+    parts = spec.split(':')
+    if len(parts) == 4:
+        bind, lport, rhost, rport = parts
+    elif len(parts) == 3:
+        bind, (lport, rhost, rport) = '127.0.0.1', parts
+    else:
+        fail('Bad local forwarding specification \'%s\'' % spec)
+    pidfile = os.path.join(os.environ.get('TMPDIR', '/tmp'), 'fake-ssh-forward-%s.pid' % lport)
+    if op == 'cancel':
+        try:
+            with open(pidfile) as f:
+                os.kill(int(f.read()), signal.SIGTERM)
+            os.unlink(pidfile)
+        except (OSError, ValueError):
+            pass
+        return 0
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        server.bind((bind, int(lport)))
+    except OSError:
+        fail('mux_client_forward: forwarding request failed: Port forwarding failed', 1)
+    server.listen(16)
+    if os.fork() > 0:
+        sys.stdout.write('')
+        return 0
+    os.setsid()
+    with open(pidfile, 'w') as f:
+        f.write(str(os.getpid()))
+    for fd in (0, 1, 2):
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+
+    def pipe(a, b):
+        try:
+            while True:
+                data = a.recv(65536)
+                if not data:
+                    break
+                b.sendall(data)
+        except OSError:
+            pass
+        finally:
+            for s in (a, b):
+                try:
+                    s.shutdown(socket.SHUT_RDWR)
+                except OSError:
+                    pass
+
+    while True:
+        client, _ = server.accept()
+        try:
+            upstream = socket.create_connection((rhost, int(rport)))
+        except OSError:
+            client.close()
+            continue
+        threading.Thread(target=pipe, args=(client, upstream), daemon=True).start()
+        threading.Thread(target=pipe, args=(upstream, client), daemon=True).start()
+
+
+def forward_socket(op, spec):
+    """`-O forward -R <ruta remota>:<ruta local>` con sockets Unix: el "remoto" es este Mac, así que es un
+    proxy de un socket a otro, en segundo plano (como `StreamLocalBindUnlink=yes`, borra uno viejo)."""
+    import socket
+    import threading
+    remote, _, local = spec.partition(':')
+    if not remote.startswith('/') or not local.startswith('/'):
+        fail('Bad remote forwarding specification \'%s\'' % spec)
+    if op == 'cancel':
+        return 0
+    try:
+        os.unlink(remote)
+    except OSError:
+        pass
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    server.bind(remote)
+    os.chmod(remote, 0o600)
+    server.listen(16)
+    if os.fork() > 0:
+        return 0
+    os.setsid()
+    for fd in (0, 1, 2):
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+
+    def pipe(a, b):
+        try:
+            while True:
+                data = a.recv(65536)
+                if not data:
+                    break
+                b.sendall(data)
+        except OSError:
+            pass
+        finally:
+            for x in (a, b):
+                try:
+                    x.shutdown(socket.SHUT_RDWR)
+                except OSError:
+                    pass
+
+    while True:
+        client, _ = server.accept()
+        upstream = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        try:
+            upstream.connect(local)
+        except OSError:
+            client.close()
+            continue
+        threading.Thread(target=pipe, args=(client, upstream), daemon=True).start()
+        threading.Thread(target=pipe, args=(upstream, client), daemon=True).start()
+
+
+def split_target(host):
+    user = None
+    if '@' in host:
+        user, host = host.rsplit('@', 1)
+    return user, host
+
+
+def main():
+    argv = sys.argv[1:]
+    log = os.environ.get('FAKE_SSH_LOG')
+    if log:
+        with open(log, 'a') as f:
+            f.write(json.dumps(argv) + '\n')
+
+    opts, target, rest = parse(argv)
+    if target is None:
+        fail('usage: ssh [-46AaCfGgKkMNnqsTtVvXxYy] destination [command [argument ...]]')
+    user, hostname = split_target(target)
+    user = opts['l'] or user or os.environ.get('USER', 'user')
+    port = opts['p'] or '22'
+
+    if 'G' in opts['flags']:
+        sys.stdout.write('hostname %s\nuser %s\nport %s\n' % (hostname.lower(), user, port))
+        return 0
+
+    kind = os.environ.get('FAKE_SSH_FAIL', '')
+    if kind == 'auth':
+        fail('%s@%s: Permission denied (publickey,password).' % (user, hostname))
+    if kind in ('unreachable', 'refused'):
+        fail('ssh: connect to host %s port %s: Connection refused' % (hostname, port))
+    if kind == 'resolve':
+        fail('ssh: Could not resolve hostname %s: nodename nor servname provided, or not known' % hostname)
+    if kind == 'timeout':
+        fail('ssh: connect to host %s port %s: Operation timed out' % (hostname, port))
+    if kind == 'hostkey':
+        fail('No ED25519 host key is known for %s and you have requested strict checking.\n'
+             'Host key verification failed.' % hostname)
+    if kind == 'hostkey-changed':
+        fail('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n'
+             '@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @\n'
+             '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n'
+             'Offending ED25519 key in /Users/x/.ssh/known_hosts:3\n'
+             'Host key for %s has changed and you have requested strict checking.\n'
+             'Host key verification failed.' % hostname)
+
+    if opts['O'] is not None:
+        if opts['O'] == 'check':
+            if os.environ.get('FAKE_SSH_NO_MASTER'):
+                fail('Control socket connect(/tmp/omni-ssh/x): No such file or directory')
+            sys.stderr.write('Master running (pid=%d)\r\n' % os.getpid())
+            return 0
+        if opts['O'] in ('exit', 'stop'):
+            sys.stderr.write('Exit request sent.\r\n')
+            return 0
+        if opts['O'] in ('forward', 'cancel') and opts['R']:
+            return forward_socket(opts['O'], opts['R'])
+        if opts['O'] in ('forward', 'cancel'):
+            return forward(opts['O'], opts['L'])
+        fail('Unrecognised multiplex command "%s"' % opts['O'])
+
+    if 'N' in opts['flags']:
+        return 0
+
+    if not rest:
+        fail('fake-ssh: shell interactivo no soportado (pasa un comando)')
+
+    # Igual que OpenSSH: los argumentos del comando se unen con un espacio y sshd los entrega al shell.
+    command = ' '.join(rest)
+    home = os.environ.get('FAKE_SSH_HOME') or os.environ.get('HOME') or '/'
+    os.chdir(home)
+    env = dict(os.environ)
+    env['HOME'] = home
+    shell = os.environ.get('FAKE_SSH_REMOTE_SHELL')
+    if shell:
+        env['SHELL'] = shell
+    login = os.environ.get('FAKE_SSH_LOGIN_SHELL') or '/bin/sh'
+    drop = os.environ.get('FAKE_SSH_DROP_FILE')
+    if drop and opts['flags'].count('t') >= 1:
+        return run_droppable(login, command, env, drop)
+    os.execve(login, [login, '-c', command], env)
+
+
+def run_droppable(login, command, env, drop):
+    # El comando corre en su propio grupo; si aparece `drop`, muere todo el grupo (sshd colgando) y
+    # ssh sale con 255. Si el comando termina solo, ssh sale con su código.
+    pid = os.fork()
+    if pid == 0:
+        # Grupo propio (para matarlo entero) y en primer plano de la terminal: si no, el shell no
+        # podría leer el teclado (SIGTTIN), cosa que con sshd de verdad nunca pasa.
+        os.setpgid(0, 0)
+        if os.isatty(0):
+            signal.signal(signal.SIGTTOU, signal.SIG_IGN)
+            os.tcsetpgrp(0, os.getpid())
+            signal.signal(signal.SIGTTOU, signal.SIG_DFL)
+        os.execve(login, [login, '-c', command], env)
+    while True:
+        done, status = os.waitpid(pid, os.WNOHANG)
+        if done:
+            return os.waitstatus_to_exitcode(status) if os.WIFEXITED(status) else 255
+        if os.path.exists(drop):
+            try:
+                os.killpg(pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            os.waitpid(pid, 0)
+            sys.stderr.write('Connection to fake closed by remote host.\n')
+            return 255
+        time.sleep(0.2)
+
+
+if __name__ == '__main__':
+    sys.exit(main())

@@ -1,0 +1,102 @@
+/* Paleta tomada de Orca (tema oscuro). Único lugar donde se escriben colores. */
+:root {
+  --bg: #0a0a0a;
+  --bg-term: #050505;
+  --surface: #171717;
+  --surface-2: #262626;
+  --surface-3: #404040;
+
+  --text: #fafafa;
+  --text-2: #a1a1a1;
+  /* text-3 ≥ 4.5:1 sobre bg y surface (AA); text-4 ≥ 3:1, solo para metadatos no esenciales. */
+  --text-3: #808080;
+  --text-4: #666666;
+
+  --border: rgba(255, 255, 255, 0.07);
+  --border-2: rgba(255, 255, 255, 0.12);
+  --kbd-bg: rgba(255, 255, 255, 0.06);
+  --hover: rgba(255, 255, 255, 0.04);
+  --hover-soft: rgba(255, 255, 255, 0.03);
+  /* Fila del tab en pantalla mientras el cursor de la lista está en otra: visible pero por debajo del cursor. */
+  --active-soft: rgba(255, 255, 255, 0.07);
+  --card-cur: rgba(255, 255, 255, 0.025);
+  --scrim: rgba(0, 0, 0, 0.45);
+  /* Opacidad del contenido de los panes sin foco (terminal, editor, vista previa): se distingue el activo sin dejar de leer el resto. */
+  --pane-dim: 0.88;
+  /* Mitad del pane donde caerá otro que se está arrastrando por su franja. */
+  --drop-zone: rgba(255, 255, 255, 0.09);
+  --shadow: 0 30px 80px -20px #000;
+  /* Widget flotante (Tareas): material translúcido que deja ver la app detrás, como los widgets de
+   * macOS; sombra en dos capas, una de contacto y otra de ambiente, en lugar de borde. */
+  --widget-bg: rgba(28, 28, 30, 0.72);
+  --widget-row: rgba(255, 255, 255, 0.06);
+  --widget-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 24px 64px -12px rgba(0, 0, 0, 0.7);
+  --on-primary-soft: rgba(0, 0, 0, 0.08);
+
+  --primary: #e5e5e5;
+  --on-primary: #171717;
+
+  --status-question: #f97316;
+  --status-question-text: #fdba74;
+  --status-working: #d4a300;
+  --status-ready: #16a34a;
+  --status-done: #525252;
+  /* Sin leer (§3.14): terminó de trabajar con el pane fuera de pantalla. */
+  --status-unread: #3b82f6;
+  --status-unread-text: #93c5fd;
+  --ai: #a78bfa;
+  --locate: #60a5fa;
+  --danger: #ef4444;
+
+  /* Revisión (§3.16): fondos de líneas añadidas y borradas al 10 %, sus números, y el acento violeta de un comentario. */
+  --diff-add-bg: rgba(34, 197, 94, 0.1);
+  --diff-del-bg: rgba(239, 68, 68, 0.1);
+  --diff-add-text: #4ade80;
+  --diff-del-text: #f87171;
+  --accent-comment: #a78bfa;
+
+  /* Pastillas de color de los proyectos (sidebar): se eligen por hash estable del id. */
+  --chip-1: #22c55e;
+  --chip-2: #ec4899;
+  --chip-3: #3b82f6;
+  --chip-4: #f59e0b;
+  --chip-5: #8b5cf6;
+  --chip-6: #14b8a6;
+  --on-chip: #ffffff;
+
+  /* Colores del markup del navegador (lápiz, figuras, texto); el lienzo los lee por nombre. */
+  --mark-red: #ef4444;
+  --mark-orange: #f97316;
+  --mark-yellow: #eab308;
+  --mark-green: #22c55e;
+  --mark-blue: #3b82f6;
+  --mark-white: #ffffff;
+
+  /* Vista previa (§3.20): texto de lectura, encabezados, enlaces, fondo de código, relleno de citas y filetes. */
+  --prose-text: #d4d4d4;
+  --prose-heading: var(--text);
+  --prose-muted: var(--text-3);
+  --prose-link: var(--locate);
+  --prose-code-bg: var(--bg-term);
+  --prose-quote-bg: var(--hover);
+  --prose-rule: var(--border);
+
+  --radius: 10px;
+  --radius-sm: 6px;
+
+  /* Escala tipográfica: cinco tamaños y nada más. xs metadatos, atajos y pies; sm controles y
+   * descripciones; md texto de la app; lg filas destacadas y títulos de vacío; xl títulos de sección.
+   * La terminal y el editor usan el tamaño de Ajustes, no esta escala. */
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-md: 13px;
+  --fs-lg: 14px;
+  --fs-xl: 16px;
+
+  --font: 'Inter Variable', Inter, -apple-system, system-ui, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --titlebar-h: 40px;
+  --footer-h: 30px;
+  --sidebar-w: 290px;
+}

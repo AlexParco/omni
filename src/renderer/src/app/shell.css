@@ -1,0 +1,87 @@
+/*
+ * Cascarón de la app: cuerpo (sidebar + main) · footer. Sin barra de título: la cabecera del sidebar y
+ * los tabs comparten la fila del semáforo. Con el sidebar oculto vuelve una fila superior (`.titlebar`).
+ */
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr var(--footer-h);
+  /* minmax(0, …): sin esto la columna toma el min-content del cuerpo, y el canvas de xterm (ancho
+   * fijo en px del tamaño anterior) lo empuja por encima de la ventana al achicarla; el host nunca
+   * encoge, el ResizeObserver no dispara el refit y la app queda desbordada. */
+  grid-template-columns: minmax(0, 1fr);
+}
+.app[data-titlebar] { grid-template-rows: var(--titlebar-h) 1fr var(--footer-h); }
+.body { display: flex; min-width: 0; min-height: 0; }
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+/* Otra vista en pantalla (Worktrees, revisión, broadcast): el workspace sigue montado (xterm vivo) pero no se pinta; al volver, el ResizeObserver reajusta. */
+.main[hidden] { display: none; }
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 14px;
+  -webkit-app-region: drag;
+}
+.titlebar__search {
+  flex: 1;
+  max-width: 420px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  margin: 0 auto;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+  -webkit-app-region: no-drag;
+}
+.titlebar__search .kbd { margin-left: auto; }
+
+/* Cabecera de la ventana: deja libre el semáforo (x 14, tres botones) y se arrastra como una barra. */
+.window-head {
+  height: var(--titlebar-h);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 80px;
+  -webkit-app-region: drag;
+}
+.window-head .icon-btn { -webkit-app-region: no-drag; }
+.window-head__name { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; color: var(--text); }
+/* Ajustes (engranaje) al borde derecho de la cabecera; con el sidebar oculto queda junto al nombre. */
+.window-head__end { margin-left: auto; display: inline-flex; }
+
+/* Tabs del workspace en la fila del semáforo: el hueco libre arrastra la ventana. Con el sidebar
+ * oculto, la cabecera de la ventana abre la fila (`.window-head` dentro de `.tabs`). */
+.main > .tabs > .window-head { flex: none; padding-right: 12px; -webkit-app-region: drag; }
+.main > .empty-head { flex: none; }
+.main > .tabs { height: var(--titlebar-h); -webkit-app-region: drag; }
+.main > .tabs > * { -webkit-app-region: no-drag; }
+
+/* Estado global en el pie (pendientes, aviso, costo): mismo tono del pie, el aviso se recorta primero. */
+.status-bar { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.status-bar__banner { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-2); }
+/* Costo de hoy: abre el widget Uso (§3.25); mismo botón plano que el de pendientes. */
+.status-bar__cost { height: 22px; padding: 0 6px; border-radius: var(--radius-sm); color: var(--text-3); font-family: var(--mono); font-size: inherit; cursor: default; }
+.status-bar__cost:hover { background: var(--hover); color: var(--text-2); }
+.status-bar__notice { height: 22px; padding: 0 8px; border-radius: var(--radius-sm); color: var(--status-working); font-size: inherit; cursor: default; }
+.status-bar__notice:hover { background: var(--hover); }
+.status-bar__notice:disabled { color: var(--text-3); }
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 14px;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  border-top: 1px solid var(--border);
+  overflow: hidden;
+}
+/* El prefijo abre la fila: un poco más de aire lo separa de lo que va tras él, sin raya. */
+.footer__prefix { margin-right: 6px; }
+.footer__right { margin-left: auto; display: flex; align-items: center; gap: 16px; min-width: 0; }

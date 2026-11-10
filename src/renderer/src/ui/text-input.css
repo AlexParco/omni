@@ -1,0 +1,14 @@
+.text-input {
+  width: 100%;
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  font: var(--fs-md) var(--font);
+  outline: 0;
+}
+.text-input::placeholder { color: var(--text-4); }
+/* Sin marco al enfocar: relleno más claro, como el resto de campos (regla de §3.8). */
+.text-input:focus-visible { background: var(--surface-2); }

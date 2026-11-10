@@ -1,0 +1,30 @@
+# Empaquetado local: `pnpm package` deja `dist/mac-arm64/omni.app` firmada ad-hoc (sin cuenta de Apple).
+# Sin firma alguna macOS no registra la app en el Centro de Notificaciones; con ad-hoc sí.
+# Un bundle propio es lo que macOS registra en el Centro de Notificaciones; el Electron de
+# desarrollo (firmado ad-hoc, bundle com.github.Electron) no recibe notificaciones (§3.14).
+appId: pe.alexander.omni
+productName: omni
+directories:
+  output: dist
+  buildResources: build
+files:
+  - out/**
+  - package.json
+# La CLI y el servidor MCP van sueltos en Resources/bin: `mcp:command` apunta ahí (§3.21).
+extraResources:
+  - from: bin
+    to: bin
+asar: true
+# El typescript-language-server se lanza como proceso hijo (módulo ES): no puede leerse desde dentro del asar (§3.19b).
+asarUnpack:
+  - node_modules/typescript-language-server/**
+npmRebuild: false
+mac:
+  target:
+    - target: dir
+      arch:
+        - arm64
+  category: public.app-category.developer-tools
+  identity: null
+  hardenedRuntime: false
+  gatekeeperAssess: false

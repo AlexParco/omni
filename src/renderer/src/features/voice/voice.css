@@ -1,0 +1,65 @@
+/* Dictado (ARCHITECTURE §3.22): tarjeta de 520 px centrada abajo, sobre el footer. Solo contenedor;
+ * las piezas son primitivos de ui/ (Badge, Dot, Kbd, Hint, Row, TextArea, Button). Sin velo: la
+ * terminal sigue a la vista mientras se dicta. */
+
+.voice {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--footer-h) + 18px);
+  transform: translateX(-50%);
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  background: var(--surface);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  outline: 0;
+  color: var(--text-2);
+  z-index: 10;
+}
+
+/* Cabecera 44px: punto de estado, "Dictando a <título>", badge del agente y el tiempo a la derecha. */
+.voice__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  flex: none;
+  padding: 0 18px;
+}
+.voice__title { flex: 1; min-width: 0; font-size: var(--fs-md); font-weight: 500; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.voice__title b { font-weight: 600; color: var(--text); }
+.voice__time { font: 500 var(--fs-sm) var(--mono); font-variant-numeric: tabular-nums; color: var(--text-3); flex: none; }
+.voice[data-phase='recording'] .voice__time { color: var(--text); }
+
+/* Nivel del micrófono: pista de 3px con la barra ámbar (--status-working) que crece con el RMS. */
+.voice__level { height: 3px; margin: 0 18px; border-radius: 2px; background: var(--surface-2); overflow: hidden; flex: none; }
+.voice__level-bar { height: 100%; width: 0; border-radius: 2px; background: var(--status-working); transition: width 80ms linear; }
+.voice[data-phase='recording'] .dot[data-status='working'] { animation: voice-pulse 1.2s ease-in-out infinite; }
+@keyframes voice-pulse { 50% { opacity: 0.35; } }
+
+/* Cuerpo: texto parcial o final a 14px; mínimo 44px para que la tarjeta no salte entre estados. */
+.voice__body { padding: 12px 18px 4px; font-size: var(--fs-lg); line-height: 1.45; color: var(--text); min-height: 44px; }
+.voice__body[data-muted] { color: var(--text-3); }
+.voice__body .text-area { font-size: var(--fs-lg); }
+
+/* Lista de destinos (⌥⇧Space): filas de nivel 1 como en "Enviar al agente". */
+.voice__targets { display: flex; flex-direction: column; margin: 0 -8px; }
+.voice__targets .row + .row { margin-top: 1px; }
+
+/* Descarga del modelo: progreso en una pista como la del nivel, con el porcentaje al lado. */
+.voice__progress { display: flex; align-items: center; gap: 10px; margin-top: 8px; font: var(--fs-sm) var(--mono); color: var(--text-3); font-variant-numeric: tabular-nums; }
+.voice__progress .voice__level { flex: 1; margin: 0; }
+.voice__progress .voice__level-bar { background: var(--primary); }
+
+/* Pie: atajos en gris separados por aire, y la línea de privacidad debajo, más apagada. */
+.voice__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  padding: 10px 18px 0;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+}
+.voice__note { padding: 6px 18px 12px; font-size: var(--fs-xs); color: var(--text-4); }

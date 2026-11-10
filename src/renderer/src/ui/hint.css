@@ -1,0 +1,8 @@
+.hint { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.hint[data-on] { color: var(--text); }
+.hint[data-on] .kbd { background: var(--primary); color: var(--on-primary); }
+.hint[data-quiet] { gap: 6px; color: var(--text-4); }
+.hint[data-quiet] .kbd { min-width: 0; height: auto; padding: 0; background: none; color: var(--text-2); font-weight: 500; letter-spacing: 0.02em; }
+/* Prefijo armado: la tecla vuelve a su caja encendida para que se note que espera. */
+.hint[data-quiet][data-on] { color: var(--text-2); }
+.hint[data-quiet][data-on] .kbd { padding: 0 5px; height: 18px; background: var(--primary); color: var(--on-primary); }

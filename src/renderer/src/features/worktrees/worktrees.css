@@ -1,0 +1,131 @@
+/*
+ * Vista Worktrees (ARCHITECTURE §3.15): reemplaza el área de panes. Solo contenedor: dos columnas
+ * (lista 620 px · detalle, máx. 620 px). Las piezas son primitivos de ui/ (Row multiline, Dot, Badge,
+ * Kbd, Hint, Button, Empty) y aquí no se restyla ninguno.
+ */
+.worktrees {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  outline: 0;
+}
+
+/* Columna principal: cabecera 48px (como la del sidebar), lista con scroll y pie de atajos. */
+.worktrees__main {
+  width: 620px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+}
+.worktrees__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  flex: none;
+  padding: 0 16px 0 20px;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+}
+.worktrees__title { font-size: var(--fs-lg); font-weight: 500; color: var(--text); }
+.worktrees__head .row__count { margin-left: 0; }
+.worktrees__head-end { margin-left: auto; display: inline-flex; gap: 4px; }
+
+.worktrees__error { flex: none; margin: 0; padding: 8px 20px; font-size: var(--fs-sm); line-height: 1.5; color: var(--danger); background: var(--hover-soft); }
+.worktrees__row-error { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--danger); }
+.worktrees__detail-error { flex: none; margin: 6px 16px 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--danger); }
+.worktrees__notice { margin-left: auto; color: var(--text-2); }
+
+.worktrees__list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 8px 8px;
+}
+.worktrees__list:focus { outline: 0; }
+
+/* Grupo por proyecto: cabecera con la pastilla del proyecto y su comando de tests en mono; debajo las filas. */
+.worktrees__group { display: flex; flex-direction: column; }
+.worktrees__group + .worktrees__group { margin-top: 6px; }
+.worktrees__group-head { display: flex; align-items: center; gap: 8px; min-width: 0; height: 36px; padding: 0 12px; }
+.worktrees__group-name { font-size: var(--fs-md); font-weight: 500; color: var(--text); white-space: nowrap; }
+.worktrees__group-tests { margin-left: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--fs-xs) var(--mono); color: var(--text-4); }
+
+/* Dentro de una fila: nombre de la sesión en gris y el estado del agente con su color. */
+.worktrees__agent { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.worktrees .row__line [data-status='question'] { color: var(--status-question-text); }
+.worktrees .row__line [data-status='working'] { color: var(--status-working); }
+.worktrees__tests[data-status='pass'] { color: var(--status-ready); }
+.worktrees__tests[data-status='fail'] { color: var(--danger); }
+.worktrees__tests[data-status='running'] { color: var(--status-working); }
+
+.worktrees__foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  flex: none;
+  min-height: 36px;
+  padding: 8px 16px;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  border-top: 1px solid var(--border);
+}
+
+/* Detalle: cabecera 48px, línea mono rama → base, ruta, bloque de tests con su resumen y acciones como filas. */
+.worktrees__detail {
+  flex: 1;
+  min-width: 0;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.worktrees__detail-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  flex: none;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+.worktrees__cost { flex: none; font: var(--fs-sm) var(--mono); color: var(--text-3); font-variant-numeric: tabular-nums; }
+.worktrees .row__line .row__time { margin-left: auto; }
+.worktrees__detail-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-md); font-weight: 500; color: var(--text); }
+.worktrees__detail-line { flex: none; margin: 12px 16px 0; font: var(--fs-sm) var(--mono); color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.worktrees__detail-path { flex: none; margin: 4px 16px 0; font: var(--fs-xs) var(--mono); color: var(--text-4); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Tests: mismo fondo que los panes, el título con el color del resultado y el resumen en mono. */
+.worktrees__detail-tests {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 16px 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--bg-term);
+  font-size: var(--fs-sm);
+  color: var(--text-3);
+}
+.worktrees__detail-tests-title { font-weight: 500; color: var(--text-2); }
+.worktrees__detail-tests[data-status='pass'] .worktrees__detail-tests-title { color: var(--status-ready); }
+.worktrees__detail-tests[data-status='fail'] .worktrees__detail-tests-title { color: var(--danger); }
+.worktrees__detail-tests[data-status='running'] .worktrees__detail-tests-title { color: var(--status-working); }
+.worktrees__detail-summary { margin: 0; max-height: 200px; overflow: auto; font: var(--fs-sm)/1.5 var(--mono); color: var(--text-2); white-space: pre-wrap; user-select: text; }
+.worktrees__detail-at { font-size: var(--fs-xs); color: var(--text-4); }
+
+/* Acciones: filas `Row` con la primaria en relleno; sin acentos ni marcos. */
+.worktrees__actions { flex: none; margin: 12px 16px 0; display: flex; flex-direction: column; }
+
+/* Diálogos de la feature (nombre, issue, comando de tests): solo contenedor del campo y las acciones a la derecha del pie. */
+.worktrees-dialog { padding: 14px 10px 6px; display: flex; flex-direction: column; gap: 8px; }
+.worktrees-dialog__error { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--danger); }
+.worktrees-dialog__note { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-4); }
+.worktrees-dialog__actions { margin-left: auto; display: inline-flex; gap: 6px; }

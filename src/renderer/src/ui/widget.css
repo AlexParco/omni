@@ -1,0 +1,55 @@
+/* Widget flotante (Puertos §3.24, Uso §3.25): mismo material que el de Tareas (§3.12). Velo de los
+ * diálogos; tarjeta de 440 × 560 al centro, translúcida, sin bordes; entra con un zoom leve. */
+.widget-overlay { position: fixed; inset: 0; z-index: 10; background: var(--scrim); }
+
+.widget {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 440px;
+  height: 560px;
+  max-height: calc(100vh - 48px);
+  isolation: isolate;
+  overflow: clip;
+  background: var(--widget-bg);
+  backdrop-filter: blur(32px) saturate(1.4);
+  border-radius: 22px;
+  box-shadow: var(--widget-shadow);
+  display: flex;
+  flex-direction: column;
+  outline: 0;
+  color: var(--text-2);
+  transform: translate(-50%, -50%);
+  animation: widget-in 0.18s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+@keyframes widget-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .widget { animation: none; }
+}
+
+/* Cabecera: título con su atajo a la izquierda; el número en grande a la derecha con qué cuenta debajo. */
+.widget__head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  row-gap: 6px;
+  flex: none;
+  padding: 18px 20px 14px 24px;
+}
+.widget__title { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-xl); font-weight: 600; color: var(--text); }
+.widget__value { justify-self: end; font-size: var(--fs-xl); line-height: 24px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.widget__sub { grid-column: 2; justify-self: end; font-size: var(--fs-sm); color: var(--text-3); }
+
+/* Pie: atajos en una línea, o el aviso de la última acción. */
+.widget__foot {
+  display: flex;
+  gap: 14px;
+  flex: none;
+  padding: 10px 20px 16px 24px;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+}

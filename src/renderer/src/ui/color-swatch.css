@@ -1,0 +1,13 @@
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  flex: none;
+}
+.swatch:hover { background: var(--hover); }
+.swatch[data-on] { background: var(--surface-2); }
+.swatch__dot { width: 12px; height: 12px; border-radius: 50%; transition: transform 0.1s; }
+.swatch[data-on] .swatch__dot { transform: scale(1.3); }

@@ -1,0 +1,114 @@
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--text-2);
+  font-size: var(--fs-md);
+  min-width: 0;
+}
+/* Aire entre filas: dos rellenos vecinos (tab activo + pane con cursor) no deben leerse como una sola mancha. */
+.row + .row { margin-top: 2px; }
+/*
+ * Sangría por nivel. El texto de un hijo nunca arranca antes que el de su padre:
+ *   proyecto: chip 22 + gap 10 → texto en 44
+ *   tab:      icono 16 + gap 10 con sangría 24 → texto en 50
+ *   pane:     sin icono; el relleno empieza a la derecha de la guía (margen 40) y el texto en 62,
+ *             un paso a la derecha del texto del tab para que la jerarquía se lea (como en la referencia).
+ */
+.row[data-level='1'] { padding-left: 24px; }
+.row[data-level='2'] { margin-left: 40px; padding-left: 22px; min-height: 32px; font-size: var(--fs-md); color: var(--text-3); }
+/*
+ * Dentro de una carpeta o worktree (`nested`) todo baja un paso: el icono del tab arranca donde arranca
+ * el nombre de la carpeta (24 + icono 14 + gap 10 = 48) y su texto queda en 74; el pane sigue un paso más.
+ */
+.row[data-level='1'][data-nested] { padding-left: 48px; }
+.row[data-level='2'][data-nested] { margin-left: 64px; }
+.row:hover { background: var(--hover); }
+.row[data-status='question'] .row__label { color: var(--status-question-text); }
+
+/*
+ * Fila de varias líneas (Worktrees, Broadcast, Puertos): relleno 10×12 sin sangría por nivel; el punto y el icono se alinean
+ * con la primera línea (20px → centro a 10, punto de 7 con margen 7). Tres líneas (20 + 18 + 18, aire
+ * de 3) dan 82px de alto.
+ */
+.row[data-multiline] { align-items: flex-start; padding: 10px 12px; }
+.row[data-multiline] .dot { margin-top: 7px; }
+.row[data-multiline] > svg { margin-top: 2px; }
+.row__lines { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.row__line { display: flex; align-items: center; gap: 8px; min-width: 0; line-height: 20px; }
+.row__line[data-muted] { font-size: var(--fs-sm); line-height: 18px; color: var(--text-3); }
+.row[data-multiline] .row__meta { flex: none; line-height: 18px; }
+.row__time { flex: none; font-size: var(--fs-sm); color: var(--text-4); font-variant-numeric: tabular-nums; }
+
+/*
+ * Guía vertical de un bloque de hijos: cada fila pinta su tramo (cubriendo el aire de arriba) y,
+ * seguidas, forman una sola línea bajo el centro del icono del tab padre (24 + 8 = 32), fuera del relleno.
+ */
+.row[data-guide]::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: -2px;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+/*
+ * Dos marcas, sin contornos ni marcos, solo relleno:
+ * - activa (el tab que está en pantalla, el pane con foco): siempre visible. Con el teclado en la
+ *   terminal es la única marca y lleva el relleno fuerte; con el teclado en la lista baja un tono
+ *   para ceder al cursor.
+ * - cursor vim: relleno fuerte solo mientras la lista tiene el teclado.
+ */
+.row[data-active] { color: var(--text); background: var(--surface-2); }
+[data-focus='list'] .row[data-active] { background: var(--active-soft); }
+[data-focus='list'] .row[data-cursor] { background: var(--surface-2); }
+.row[data-active]:hover, [data-focus='list'] .row[data-cursor]:hover { background: var(--surface-2); }
+
+.row__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+.row[data-level='0'] .row__label { font-size: var(--fs-lg); font-weight: 500; color: var(--text); }
+.row__label[data-strong] { font-weight: 500; }
+.row__meta { font: var(--fs-sm) var(--mono); color: var(--text-4); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row__count { margin-left: 6px; font-size: var(--fs-sm); font-weight: 400; color: var(--text-3); font-variant-numeric: tabular-nums; }
+
+/*
+ * Acciones al hover/cursor: flotan sobre el extremo derecho en vez de reservar sitio, así el punto de
+ * estado y el tiempo quedan en la misma columna en todas las filas; al aparecer, tapan ese extremo.
+ */
+.row__actions { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); display: flex; gap: 2px; opacity: 0; pointer-events: none; transition: opacity 0.1s; }
+.row:hover .row__actions,
+[data-focus='list'] .row[data-cursor] .row__actions { opacity: 1; pointer-events: auto; }
+/* Solo las filas que tienen acciones ceden su extremo; en las demás (tabs, panes) el punto se queda. */
+.row:has(.row__actions):hover .row__end,
+[data-focus='list'] .row[data-cursor]:has(.row__actions) .row__end { visibility: hidden; }
+/* Con los botones a la vista, el texto (la ruta gris de una ubicación) se corta antes de ellos en vez de pasar por debajo. */
+.row:has(.row__actions):hover,
+[data-focus='list'] .row[data-cursor]:has(.row__actions) { padding-right: 60px; }
+/* Extremo derecho de la fila (tiempo, punto de estado): columna fija y alineada entre niveles. */
+.row__end { display: inline-flex; align-items: center; gap: 10px; flex: none; margin-left: auto; }
+
+.row__chevron { color: var(--text-4); flex: none; }
+.row:hover .row__chevron, .row[data-cursor] .row__chevron { color: var(--text-2); }
+
+/* Pastilla de color del proyecto: cuadrado redondeado con el icono en blanco. */
+.row__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  color: var(--on-chip);
+  flex: none;
+}
+.row__chip[data-chip='1'] { background: var(--chip-1); }
+.row__chip[data-chip='2'] { background: var(--chip-2); }
+.row__chip[data-chip='3'] { background: var(--chip-3); }
+.row__chip[data-chip='4'] { background: var(--chip-4); }
+.row__chip[data-chip='5'] { background: var(--chip-5); }
+.row__chip[data-chip='6'] { background: var(--chip-6); }

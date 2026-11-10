@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pliego de Pantallas</title>
+<style>
+  :root {
+    --page-bg:#eceada; --page-raised:#f6f5e9; --page-line:#d6d4c2; --page-line-2:#b6b4a2;
+    --page-fg:#141419; --page-mid:#4c4c56; --page-dim:#77777f; --page-accent:#3f5478;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page-bg:#101015; --page-raised:#17171d; --page-line:#26262f; --page-line-2:#373742;
+      --page-fg:#f1f0e1; --page-mid:#adadb6; --page-dim:#84848f; --page-accent:#8199bd;
+    }
+  }
+  :root[data-theme="dark"] {
+    --page-bg:#101015; --page-raised:#17171d; --page-line:#26262f; --page-line-2:#373742;
+    --page-fg:#f1f0e1; --page-mid:#adadb6; --page-dim:#84848f; --page-accent:#8199bd;
+  }
+  /* la app es un terminal: un solo mundo oscuro, igual en ambos temas */
+  :root {
+    --ink:#101015; --paper:#f1f0e1; --raised:#17171d; --overlay:#1d1d25; --sunk:#0b0b0f;
+    --line:#26262f; --line-2:#373742; --line-3:#4a4a57;
+    --lift:#8199bd; --slate:#506385; --coral:#d0685c; --moss:#7f9f7a; --amber:#c19a5b;
+    --mid:#adadb6; --dim:#84848f;
+    --mono: ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace;
+  }
+
+  * { box-sizing:border-box }
+  body { margin:0; background:var(--page-bg); color:var(--page-fg);
+         font-family:var(--mono); font-size:13.5px; line-height:1.6;
+         -webkit-font-smoothing:antialiased }
+  .wrap { max-width:1120px; margin:0 auto; padding:0 24px 120px }
+  a { color:var(--page-accent); text-decoration:none }
+  a:hover { text-decoration:underline }
+  a:focus-visible { outline:2px solid var(--page-accent); outline-offset:2px }
+
+  header { padding:64px 0 26px; border-bottom:1px solid var(--page-line-2) }
+  h1 { font-size:clamp(22px,3.4vw,34px); font-weight:700; letter-spacing:-.04em;
+       text-transform:uppercase; margin:0 0 14px; line-height:1.05; text-wrap:balance }
+  .thesis { color:var(--page-mid); max-width:64ch; margin:0 }
+  .thesis strong { color:var(--page-fg) }
+  .meta { margin:18px 0 0; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+          color:var(--page-dim); display:flex; gap:22px; flex-wrap:wrap }
+
+  /* ---- indice / contact sheet ---- */
+  .toc { margin:44px 0 0 }
+  .toc-h { font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+           color:var(--page-dim); padding-bottom:8px; margin-bottom:0;
+           border-bottom:1px solid var(--page-line) }
+  .toc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(258px,1fr));
+              gap:1px; background:var(--page-line); border:1px solid var(--page-line);
+              border-top:none; list-style:none; margin:0; padding:0 }
+  .toc-grid li { background:var(--page-raised) }
+  .toc-grid a { display:grid; grid-template-columns:auto 1fr; gap:11px; align-items:baseline;
+                padding:11px 14px; color:var(--page-fg) }
+  .toc-grid a:hover { background:var(--page-bg); text-decoration:none }
+  .toc-grid .tn { font-size:11px; color:var(--page-accent); font-weight:700;
+                  font-variant-numeric:tabular-nums }
+  .toc-grid .tt { min-width:0 }
+  .toc-grid .tt b { display:block; font-weight:400 }
+  .toc-grid .tm { display:block; font-size:10.5px; letter-spacing:.1em;
+                  text-transform:uppercase; color:var(--page-dim); margin-top:2px }
+
+  /* ---- bloque de pantalla ---- */
+  .screen { margin-top:56px; scroll-margin-top:24px }
+  .cap { display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:baseline;
+         padding-bottom:8px; margin-bottom:14px; border-bottom:1px solid var(--page-line) }
+  .cap .n { font-size:11px; letter-spacing:.14em; color:var(--page-accent); font-weight:700 }
+  .cap .mid { display:flex; align-items:baseline; gap:11px; flex-wrap:wrap }
+  .cap h2 { font-size:15px; font-weight:700; margin:0; letter-spacing:-.01em }
+  .cap .ms { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
+             color:var(--page-dim); border:1px solid var(--page-line-2); padding:1px 6px }
+  .cap .keys { font-size:11.5px; color:var(--page-dim); grid-column:3 }
+  .desc { color:var(--page-mid); max-width:78ch; margin:0 0 14px }
+  .desc b { color:var(--page-fg) }
+
+  /* ================= chrome de la app ================= */
+  .frame { background:var(--ink); border:1px solid var(--line-3); color:var(--paper);
+           display:grid; grid-template-rows:auto auto 1fr auto; height:452px;
+           overflow:hidden; position:relative; font-size:12px; line-height:1.6 }
+
+  .tabs { display:flex; align-items:stretch; background:var(--sunk);
+          border-bottom:1px solid var(--line-2); min-height:29px }
+  .tab { display:flex; align-items:center; gap:7px; padding:0 13px; color:var(--dim);
+         border-right:1px solid var(--line); font-size:11px; white-space:nowrap }
+  .tab .ti { font-variant-numeric:tabular-nums; color:var(--line-3) }
+  .tab.on { background:var(--ink); color:var(--paper); box-shadow:inset 0 1px 0 var(--lift) }
+  .tab .bell { width:5px; height:5px; border-radius:50%; background:var(--coral) }
+  .tabs .grow { flex:1; border-right:none }
+  .tabs .sess { display:flex; align-items:center; padding:0 13px; font-size:10.5px;
+                letter-spacing:.12em; text-transform:uppercase; color:var(--dim);
+                border-left:1px solid var(--line) }
+
+  .subbar { display:flex; align-items:center; gap:10px; padding:5px 13px; font-size:10.5px;
+            letter-spacing:.1em; text-transform:uppercase; color:var(--dim);
+            background:var(--raised); border-bottom:1px solid var(--line) }
+  .subbar .hot { color:var(--coral) }
+  .subbar .ok { color:var(--lift) }
+  .subbar .r { margin-left:auto; letter-spacing:.06em; text-transform:none }
+
+  .fbody { display:grid; min-height:0 }
+  .fbody.withfleet { grid-template-columns:1fr 300px }
+  .canvas { display:flex; flex-direction:column; gap:1px; background:var(--line);
+            min-height:0; min-width:0 }
+  .prow { display:flex; gap:1px; background:var(--line); flex:1; min-height:0 }
+
+  .pane { background:var(--ink); flex:1; display:flex; flex-direction:column;
+          min-width:0; min-height:0; overflow:hidden }
+  .pane.focus { box-shadow:inset 0 0 0 1px var(--slate) }
+  .pane.alert { box-shadow:inset 0 0 0 1px var(--coral) }
+  .ph { display:flex; align-items:center; gap:8px; padding:4px 9px; background:var(--raised);
+        border-bottom:1px solid var(--line); font-size:11px; white-space:nowrap }
+  .ph .nm { font-weight:700; overflow:hidden; text-overflow:ellipsis }
+  .ph .vd { font-size:9.5px; letter-spacing:.1em; color:var(--dim);
+            border:1px solid var(--line-2); padding:0 3px }
+  .ph .vd.inf { border-style:dotted; color:var(--amber) }
+  .ph .st { margin-left:auto; color:var(--dim); font-variant-numeric:tabular-nums }
+  .pane.alert .ph .st { color:var(--coral) }
+  .ph .badge { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+               color:var(--lift); border:1px solid var(--slate); padding:0 4px }
+  .pb { padding:8px 10px; white-space:pre; overflow:hidden; flex:1; color:var(--mid);
+        min-height:0; font-size:11.5px; line-height:1.62 }
+  .pb.wrap { white-space:pre-wrap }
+
+  /* tokens de contenido */
+  .k { color:var(--lift) }
+  .s { color:var(--moss) }
+  .c { color:var(--dim) }
+  .f { color:var(--paper) }
+  .e { color:var(--coral) }
+  .a { color:var(--amber) }
+  .ln { color:var(--line-3) }
+  .add { color:var(--moss) }
+  .del { color:var(--coral) }
+  .hunk { color:var(--lift) }
+  .cur { display:inline-block; width:6px; height:13px; background:var(--lift);
+         vertical-align:-2px }
+  .curb { display:inline-block; width:6px; height:13px; outline:1px solid var(--slate);
+          vertical-align:-2px }
+
+  /* ---- panel de flota lateral ---- */
+  .fleet { background:var(--raised); border-left:1px solid var(--line-2);
+           display:flex; flex-direction:column; min-height:0 }
+  .fh { display:flex; align-items:baseline; gap:9px; padding:6px 12px;
+        border-bottom:1px solid var(--line-2); font-size:10.5px; letter-spacing:.12em;
+        text-transform:uppercase; color:var(--dim) }
+  .fh .cnt { margin-left:auto; letter-spacing:.04em; text-transform:none; color:var(--mid);
+             font-variant-numeric:tabular-nums }
+  .flist { list-style:none; margin:0; padding:0; overflow:hidden; min-height:0 }
+  .it { display:grid; grid-template-columns:8px 1fr auto; gap:9px; align-items:center;
+        padding:6px 12px; border-bottom:1px solid var(--line) }
+  .it.mat { background:var(--overlay) }
+  .it.sel { background:var(--overlay); box-shadow:inset 2px 0 0 var(--lift) }
+  .dot { width:7px; height:7px; border-radius:50% }
+  .it.w .dot { background:var(--lift) }
+  .it.n .dot { background:var(--coral); box-shadow:0 0 0 3px rgba(208,104,92,.2) }
+  .it.r .dot { background:var(--moss) }
+  .it.d .dot { background:var(--line-3) }
+  .it .who { min-width:0 }
+  .it .nm { display:flex; align-items:center; gap:6px; font-weight:700; font-size:11.5px }
+  .it .vd { font-size:9px; letter-spacing:.1em; color:var(--dim);
+            border:1px solid var(--line-2); padding:0 3px; font-weight:400 }
+  .it .vd.inf { border-style:dotted; color:var(--amber) }
+  .it .cwd { font-size:10.5px; color:var(--dim); overflow:hidden;
+             text-overflow:ellipsis; white-space:nowrap }
+  .it .rt { text-align:right; font-size:10.5px; color:var(--dim);
+            font-variant-numeric:tabular-nums; white-space:nowrap }
+  .it .rt b { display:block; font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+              font-weight:400 }
+  .it.mat .rt b { color:var(--lift) }
+  .it.n .rt b { color:var(--coral) }
+  .it.q .rt b { color:var(--amber) }
+
+  /* ---- vacio ---- */
+  .empty { flex:1; display:flex; flex-direction:column; align-items:center;
+           justify-content:center; gap:9px; text-align:center; color:var(--dim);
+           background:var(--ink); padding:24px }
+  .empty .big { font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+                color:var(--mid) }
+  .empty p { margin:0; max-width:44ch; font-size:11.5px; line-height:1.7 }
+
+  /* ---- overlay / popup ---- */
+  .scrim { position:absolute; inset:0; background:rgba(10,10,14,.62) }
+  .pop { position:absolute; left:50%; top:38px; transform:translateX(-50%);
+         width:min(690px,calc(100% - 40px)); background:var(--overlay);
+         border:1px solid var(--line-3); box-shadow:0 16px 40px rgba(0,0,0,.5);
+         display:flex; flex-direction:column; max-height:calc(100% - 76px); overflow:hidden }
+  .pop.low { top:auto; bottom:34px }
+  .pop.narrow { width:min(470px,calc(100% - 40px)) }
+  .pop-in { display:flex; align-items:center; gap:9px; padding:9px 13px;
+            border-bottom:1px solid var(--line-2) }
+  .pop-in .pr { color:var(--lift) }
+  .pop-in .q { color:var(--paper) }
+  .pop-in .tag { margin-left:auto; font-size:10px; letter-spacing:.12em;
+                 text-transform:uppercase; color:var(--dim) }
+  .pop-split { display:grid; grid-template-columns:1fr 246px; min-height:0 }
+  .pop-list { list-style:none; margin:0; padding:0; overflow:hidden; min-height:0 }
+  .pop-list li { display:grid; grid-template-columns:8px 1fr auto; gap:9px; align-items:center;
+                 padding:6px 13px; border-bottom:1px solid var(--line) }
+  .pop-list li.sel { background:var(--raised); box-shadow:inset 2px 0 0 var(--lift) }
+  .pop-prev { border-left:1px solid var(--line-2); padding:10px 12px; color:var(--dim);
+              font-size:11px; overflow:hidden; background:var(--raised); white-space:pre-wrap }
+  .pop-foot { padding:6px 13px; border-top:1px solid var(--line-2); font-size:10.5px;
+              color:var(--dim); display:flex; gap:16px; flex-wrap:wrap }
+  .cmdrow { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:baseline;
+            padding:6px 13px; border-bottom:1px solid var(--line) }
+  .cmdrow.sel { background:var(--raised); box-shadow:inset 2px 0 0 var(--lift) }
+  .cmdrow .cn { color:var(--paper) }
+  .cmdrow .cd { color:var(--dim); font-size:10.5px }
+  .cmdrow .ck { color:var(--lift); font-size:10.5px }
+  .vendors { display:flex; gap:1px; background:var(--line); border-bottom:1px solid var(--line-2) }
+  .vendors div { flex:1; padding:9px 12px; background:var(--overlay); color:var(--dim) }
+  .vendors div.on { background:var(--raised); color:var(--paper);
+                    box-shadow:inset 0 -2px 0 var(--lift) }
+  .vendors b { display:block; color:inherit; font-size:11.5px }
+  .vendors span { font-size:10px; letter-spacing:.08em; text-transform:uppercase }
+
+  /* ---- statusline ---- */
+  .sl { display:flex; align-items:center; gap:12px; padding:4px 12px; background:var(--raised);
+        border-top:1px solid var(--line-2); font-size:10.5px; color:var(--dim);
+        white-space:nowrap; overflow:hidden }
+  .sl .mode { background:var(--slate); color:var(--ink); font-weight:700; padding:0 6px;
+              letter-spacing:.1em }
+  .sl .mode.pend { background:var(--amber) }
+  .sl .mode.hot { background:var(--coral); color:var(--ink) }
+  .sl .br { color:var(--mid) }
+  .sl .r { margin-left:auto; display:flex; gap:12px }
+  .sl .hot { color:var(--coral) }
+  .sl .ok { color:var(--lift) }
+
+  footer { margin-top:72px; padding-top:20px; border-top:1px solid var(--page-line-2);
+           color:var(--page-dim); font-size:11.5px; display:flex; gap:22px; flex-wrap:wrap }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Pliego de pantallas</h1>
+    <p class="thesis">Dieciocho estados de agentdeck, dibujados. Cada uno lleva el hito en que
+    aparece, así que el pliego se lee también como el <strong>orden en que se construye</strong>:
+    lo de M1 es un multiplexor, lo de M2–M3 es el MVP, y de M5 en adelante es lo que todavía
+    no existe. Nada de esto está implementado — es prediseño.</p>
+    <p class="meta">
+      <span>agentdeck · design</span>
+      <span>18 pantallas</span>
+      <span>2026-09-03</span>
+    </p>
+  </header>
+
+  <nav class="toc">
+    <p class="toc-h">Índice</p>
+    <ul class="toc-grid" id="toc"></ul>
+  </nav>
+
+  <main id="screens"></main>
+
+  <footer>
+    <span>agentdeck/design/screens.html</span>
+    <span><a href="index.html">← el argumento (modo gestionado)</a></span>
+    <span><a href="mockup.html">recorrido anterior</a></span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------- datos de flota reusables ---------------- */
+  var F = {
+    inventory:  { nm:"ce-inventory",   vd:"CC", cwd:"~/private/billing-api-go" },
+    order:   { nm:"ws-order",    vd:"CC", cwd:"~/private/api-facturacion-peru" },
+    track:   { nm:"ws-tracking", vd:"CC", cwd:"~/private/api-tracking-peru" },
+    status:  { nm:"web-status",  vd:"CX", cwd:"~/private/shaloom-api-astro" },
+    prober:  { nm:"prober",      vd:"CC", cwd:"~/private/billing-status" },
+    notes:   { nm:"notes-sync",  vd:"OC", cwd:"~/private/notes" },
+    scout:   { nm:"portscout",   vd:"CX", cwd:"~/private/portscout" },
+    probe:   { nm:"nestprobe",   vd:"CC", cwd:"~/private/nestprobe" },
+    koach:   { nm:"koach-api",   vd:"OC", cwd:"~/private/koach-app" },
+    marvi:   { nm:"marvisur",    vd:"CC", cwd:"~/private/marvisur-api-go" }
+  };
+  // st: w working · n needs you · r ready · d down.  q = en cola (sin cupo de PTY)
+  function fi(base, st, rt, opts) {
+    var o = opts || {};
+    return { nm:base.nm, vd:base.vd, cwd:base.cwd, st:st, rt:rt,
+             mat:!!o.mat, sel:!!o.sel, q:!!o.q, inf:base.vd === "OC", lbl:o.lbl };
+  }
+
+  var STD_FLEET = [
+    fi(F.inventory,"n","1:12",{mat:true}),
+    fi(F.order,"w","0:42"), fi(F.track,"w","3:08"), fi(F.scout,"w","2:24"),
+    fi(F.notes,"w","2:12"), fi(F.probe,"r","1:39"), fi(F.status,"r","0:51"),
+    fi(F.koach,"w","4:02"), fi(F.prober,"w","0:18"), fi(F.marvi,"d","12:44")
+  ];
+
+  /* ---------------- contenidos de pane ---------------- */
+  var NVIM = '<span class="ln"> 41</span> <span class="k">pub fn</span> <span class="f">step</span>(&amp;<span class="k">mut self</span>, key: KeyEvent) -&gt; Step {\n'
+           + '<span class="ln"> 42</span>     <span class="k">match</span> <span class="k">self</span>.cursor.take() {\n'
+           + '<span class="ln"> 43</span>         Some(n) =&gt; <span class="k">self</span>.walk(n, key),\n'
+           + '<span class="ln"> 44</span>         None    =&gt; <span class="k">self</span>.walk(<span class="k">self</span>.root.clone(), key),\n'
+           + '<span class="ln"> 45</span>     }<span class="cur"></span>\n'
+           + '<span class="ln"> 46</span> }\n'
+           + '<span class="ln"> 47</span>\n'
+           + '<span class="ln"> 48</span> <span class="c">/// `Miss` cae al pane sin tocarse (§8.4).</span>';
+
+  var BUILD = '<span class="c">   Compiling</span> agentdeck-render v0.1.0\n'
+            + '<span class="c">   Compiling</span> agentdeck-pane v0.1.0\n'
+            + '<span class="c">   Compiling</span> agentdeck-term v0.1.0\n'
+            + '<span class="s">    Finished</span> dev [unoptimized] in 8.41s\n\n'
+            + '$ <span class="cur"></span>';
+
+  var SHELL = '$ git status --short\n'
+            + ' <span class="a">M</span> crates/pane/src/tree.rs\n'
+            + ' <span class="a">M</span> crates/keymap/src/trie.rs\n'
+            + '<span class="add">??</span> crates/pane/src/damage.rs\n\n'
+            + '$ <span class="cur"></span>';
+
+  function ask(what, detail) {
+    return '<span class="f">● ' + what + '</span>\n\n' + (detail ? detail + '\n\n' : '')
+         + '<span class="e">¿Permitir?</span>  <span class="c">[s] sí   [n] no   [a] siempre</span>\n\n'
+         + '<span class="curb"></span>';
+  }
+
+  var AGENT_WORK = '<span class="c">› Leyendo</span> repository/order.repository.ts\n'
+                 + '<span class="c">› Editando</span> use-cases/create-order.use-case.ts\n'
+                 + '<span class="c">› Corriendo</span> jest --testPathPattern=order\n\n'
+                 + '<span class="s">  PASS</span>  12 tests, 0 fallos\n\n'
+                 + '<span class="c">› Escribiendo el mapper de la entidad</span> <span class="cur"></span>';
+
+  var DIFF = '<span class="hunk">@@ -18,7 +18,11 @@ export class InventoryHandler</span>\n'
+           + '   <span class="c">@ConsumerMethod(EventTopics.INVENTORY_MOVED)</span>\n'
+           + '   async onMoved(event: InventoryMovedEvent) {\n'
+           + '<span class="del">-    this.commandBus.send(new SyncInventoryGrpcCommand(event));</span>\n'
+           + '<span class="add">+    await this.commandBus.send(</span>\n'
+           + '<span class="add">+      new SyncInventoryGrpcCommand(new SyncInventoryRequestDto(event)),</span>\n'
+           + '<span class="add">+    );</span>\n'
+           + '   }\n'
+           + '<span class="hunk">@@ -3,6 +3,7 @@ import</span>\n'
+           + '<span class="add">+import { SyncInventoryRequestDto } from \'@acme-client/billing\';</span>';
+
+  var WORKTREES = '<span class="c">WORKTREE                      AGENTE        ESTADO      ±</span>\n'
+                + 'agent/ce-inventory               ce-inventory     <span class="e">espera</span>      <span class="add">+34</span> <span class="del">-9</span>\n'
+                + 'agent/ws-order-tests          ws-order      <span class="k">trabajando</span>  <span class="add">+112</span> <span class="del">-4</span>\n'
+                + 'agent/tracking-proto          ws-tracking   <span class="s">listo</span>       <span class="add">+8</span>\n'
+                + 'agent/portscout-retry         portscout     <span class="k">trabajando</span>  <span class="add">+21</span> <span class="del">-21</span>\n'
+                + 'agent/koach-api-auth          koach-api     <span class="c">caído</span>       <span class="c">—</span>\n\n'
+                + '<span class="c">[enter] diff   [m] merge   [x] descartar y limpiar</span>';
+
+  var LS = '$ agentdeck ls\n'
+         + '<span class="c">NOMBRE         VENDOR  ESTADO      PTY   TIEMPO</span>\n'
+         + 'ce-inventory      CC      <span class="e">needs you</span>   <span class="c">no</span>    1:12\n'
+         + 'ws-order       CC      <span class="k">working</span>     <span class="c">no</span>    0:42\n'
+         + 'ws-tracking    CC      <span class="k">working</span>     <span class="c">no</span>    3:08\n'
+         + 'notes-sync     OC      <span class="a">working?</span>    <span class="c">no</span>    2:12\n'
+         + 'nestprobe      CC      <span class="s">ready</span>       <span class="c">no</span>    1:39\n'
+         + '<span class="c">… 5 más · 10 sesiones vivas · 0 PTY · daemon pid 4471</span>\n\n'
+         + '$ <span class="cur"></span>';
+
+  var EDITOR = '<span class="ln"> 12</span> <span class="k">impl</span> PaneContent <span class="k">for</span> EditorPane {\n'
+             + '<span class="ln"> 13</span>     <span class="k">fn</span> <span class="f">lines</span>(&amp;<span class="k">self</span>, vp: Range&lt;<span class="k">usize</span>&gt;) -&gt; Vec&lt;Line&gt; {\n'
+             + '<span class="ln"> 14</span>         <span class="k">self</span>.rope.lines_at(vp.start)\n'
+             + '<span class="ln"> 15</span>             .take(vp.len())\n'
+             + '<span class="ln"> 16</span>             .map(|l| <span class="k">self</span>.highlight(l))<span class="cur"></span>\n'
+             + '<span class="ln"> 17</span>             .collect()\n'
+             + '<span class="ln"> 18</span>     }\n'
+             + '<span class="ln">   </span>\n'
+             + '<span class="e"> ✘  E0599</span> <span class="c">no method `highlight` on `&amp;EditorPane`</span>\n'
+             + '<span class="c"> ─  rust-analyzer · 1 error, 0 avisos</span>';
+
+  var SCROLL = '<span class="c">  jest: ce-inventory › onMoved › envía el comando gRPC</span>\n'
+             + '<span class="s">  ✓</span> normaliza el evento               <span class="c">(4 ms)</span>\n'
+             + '<span class="s">  ✓</span> awaitea el commandBus             <span class="c">(2 ms)</span>\n'
+             + '<span class="e">  ✕</span> propaga el companyId              <span class="c">(7 ms)</span>\n\n'
+             + '<span class="e">    Expected:</span> "acme-42"\n'
+             + '<span class="e">    Received:</span> undefined\n\n'
+             + '<span class="c">      at InventoryHandler.onMoved (inventory.handler.ts:24:7)</span>';
+
+  /* ---------------- las pantallas ---------------- */
+  var SCREENS = [
+    {
+      m:"M1", title:"Reposo", keys:"sin teclas",
+      desc:"El estado por defecto y el más importante de entender: <b>diez sesiones corriendo y ningún PTY abierto</b>. El canvas vacío no es una pantalla a medio hacer, es el presupuesto funcionando.",
+      tabs:[{t:"flota",on:true},{t:"billing"},{t:"acme"}],
+      empty:{ big:"canvas vacío · 0 PTYs", p:"Las 10 sesiones están gestionadas. Ninguna necesita una terminal ahora, así que ninguna tiene una." },
+      // en reposo nadie espera: un needs-you sin materializar contradiría la mecánica
+      fleet:STD_FLEET.map(function(x){
+        var c = Object.assign({}, x); c.mat = false;
+        if (c.st === "n") { c.st = "w"; c.rt = "1:12"; }
+        return c;
+      }),
+      sl:{ mode:"DECK", cwd:"~/private", br:"", r:["10 sesiones","0 PTY","120 MB","$18.60+"] }
+    },
+    {
+      m:"M1", title:"Splits de terminal", keys:"^a | · ^a -",
+      desc:"Antes de que exista un solo agente, esto ya tiene que funcionar: <b>un multiplexor</b>. Tres PTYs, foco en uno, el resto recibe sus teclas tal cual.",
+      tabs:[{t:"flota"},{t:"billing",on:true},{t:"acme"}],
+      rows:[
+        [ { nm:"nvim  trie.rs", st:"NORMAL", focus:true, body:NVIM } ],
+        [ { nm:"cargo build", st:"8.41s", body:BUILD },
+          { nm:"zsh", st:"", body:SHELL } ]
+      ],
+      sl:{ mode:"NORMAL", cwd:"~/private/agentdeck", br:"main", r:["3 panes","10 sesiones","0 PTY"] }
+    },
+    {
+      m:"M1", title:"Ventanas y campanas", keys:"^a 1-9 · ^a n",
+      desc:"Las tabs son ventanas al estilo tmux. Un punto coral en una tab inactiva significa <b>un agente pidió permiso ahí</b> — es la única notificación del sistema.",
+      tabs:[{t:"flota"},{t:"billing",on:true},{t:"acme",bell:true},{t:"koach"},{t:"scratch"}],
+      rows:[
+        [ { nm:"nvim  inventory.handler.ts", st:"NORMAL", focus:true, body:NVIM },
+          { nm:"jest --watch", st:"1 fallo", body:SCROLL } ]
+      ],
+      sl:{ mode:"NORMAL", cwd:"~/private/billing-api-go", br:"feat/inventory", r:["acme: 1 espera","10 sesiones","1 PTY"] }
+    },
+    {
+      m:"M1", title:"Scrollback", keys:"^a [ · ^u ^d",
+      desc:"Buffer acotado en <b>celdas, no en líneas</b> (§8.5): una línea de 10k columnas cuesta lo mismo que sesenta. El badge dice dónde estás y cuánto hay.",
+      tabs:[{t:"flota"},{t:"billing",on:true},{t:"acme"}],
+      rows:[
+        [ { nm:"jest --watch", st:"celda 412 / 5000", focus:true, badge:"SCROLL", body:SCROLL } ]
+      ],
+      sl:{ mode:"SCROLL", cwd:"~/private/billing-api-go", br:"feat/inventory", r:["1 pane","10 sesiones","1 PTY"] }
+    },
+    {
+      m:"M2", title:"Un agente te necesita", keys:"^a u",
+      desc:"El disparador central. <b>Nadie abrió este pane</b>: el estado del agente pasó a <em>needs you</em> y se materializó solo. Cuando respondas, se cierra.",
+      tabs:[{t:"flota",on:true},{t:"billing"},{t:"acme"}],
+      rows:[
+        [ { nm:"ce-inventory", vd:"CC", st:"espera 1:12", alert:true,
+            body:ask("Escribir en src/handlers/inventory.handler.ts",
+                     '<span class="c">  awaitear el commandBus y envolver el DTO</span>') } ]
+      ],
+      fleet:STD_FLEET.map(function(x,i){ var c=Object.assign({},x); if(i===0){c.sel=true;} return c; }),
+      sl:{ mode:"DECK", cwd:"~/private/billing-api-go", br:"agent/ce-inventory", r:["10 sesiones","1 PTY","180 MB","$18.60+"] }
+    },
+    {
+      m:"M2", title:"El techo, y la cola", keys:"^a u",
+      desc:"Dos materializados es el techo por default. Un tercer agente que pide permiso <b>espera en cola con su estado visible</b> pero sin PTY — no se abre un pane nuevo a costa del presupuesto.",
+      tabs:[{t:"flota",on:true},{t:"billing"},{t:"acme"}],
+      rows:[
+        [ { nm:"ce-inventory", vd:"CC", st:"espera 1:12", alert:true,
+            body:ask("Escribir en src/handlers/inventory.handler.ts") } ],
+        [ { nm:"portscout", vd:"CX", st:"espera 0:24", alert:true,
+            body:ask("git push origin feat/retry-budget") } ]
+      ],
+      fleet:[
+        fi(F.inventory,"n","1:12",{mat:true,sel:true}),
+        fi(F.scout,"n","0:24",{mat:true}),
+        fi(F.koach,"n","0:06",{q:true,lbl:"en cola"}),
+        fi(F.order,"w","0:42"), fi(F.track,"w","3:08"), fi(F.notes,"w","2:12"),
+        fi(F.probe,"r","1:39"), fi(F.status,"r","0:51"), fi(F.prober,"w","0:18"),
+        fi(F.marvi,"d","12:44")
+      ],
+      sl:{ mode:"DECK", cwd:"~/private", br:"", r:["10 sesiones","2 PTY · techo","240 MB","$18.60+"] }
+    },
+    {
+      m:"M3", title:"El panel de flota", keys:"^a u",
+      desc:"El overlay que cierra el MVP. <b>Ordenado por urgencia</b>, no por nombre ni por antigüedad: primero quien te espera. La derecha previsualiza sin materializar nada.",
+      tabs:[{t:"flota",on:true},{t:"billing"},{t:"acme"}],
+      rows:[ [ { nm:"ws-order", vd:"CC", st:"0:42 · 62% · $2.41", body:AGENT_WORK } ] ],
+      pop:{
+        input:{ pr:"›", q:"", tag:"10 sesiones · orden por urgencia" },
+        list:[
+          { st:"n", nm:"ce-inventory", vd:"CC", cwd:"~/private/billing-api-go", rt:"espera 1:12", sel:true },
+          { st:"n", nm:"portscout", vd:"CX", cwd:"~/private/portscout", rt:"espera 0:24" },
+          { st:"n", nm:"koach-api", vd:"OC", cwd:"~/private/koach-app", rt:"espera 0:06", inf:true },
+          { st:"w", nm:"ws-order", vd:"CC", cwd:"~/private/api-facturacion-peru", rt:"0:42" },
+          { st:"w", nm:"ws-tracking", vd:"CC", cwd:"~/private/api-tracking-peru", rt:"3:08" },
+          { st:"w", nm:"notes-sync", vd:"OC", cwd:"~/private/notes", rt:"2:12", inf:true },
+          { st:"r", nm:"nestprobe", vd:"CC", cwd:"~/private/nestprobe", rt:"1:39" },
+          { st:"d", nm:"marvisur", vd:"CC", cwd:"~/private/marvisur-api-go", rt:"12:44" }
+        ],
+        prev:'ce-inventory · CC · tier 1\n\nEspera permiso para escribir en\nsrc/handlers/inventory.handler.ts\n\n62% de contexto · $2.41\nworktree agent/ce-inventory (+34 −9)\n\nsin PTY — se materializa al saltar',
+        foot:["[enter] saltar","[m] mensaje","[d] diff","[x] matar","[esc] cerrar"]
+      },
+      sl:{ mode:"DECK", cwd:"~/private", br:"", r:["3 esperan","10 sesiones","1 PTY"] }
+    },
+    {
+      m:"M3", title:"Filtrar la flota", keys:"^a u · texto",
+      desc:"Búsqueda difusa sobre nombre y cwd. Con diez sesiones ya hace falta; con treinta es la única forma de navegar.",
+      tabs:[{t:"flota",on:true},{t:"billing"},{t:"acme"}],
+      rows:[ [ { nm:"ws-order", vd:"CC", st:"0:42 · 62% · $2.41", body:AGENT_WORK } ] ],
+      pop:{
+        input:{ pr:"›", q:"billing", tag:"3 de 10" },
+        list:[
+          { st:"n", nm:"ce-inventory", vd:"CC", cwd:"~/private/<b>billing</b>-api-go", rt:"espera 1:12", sel:true },
+          { st:"w", nm:"prober", vd:"CC", cwd:"~/private/<b>billing</b>-status", rt:"0:18" },
+          { st:"r", nm:"web-status", vd:"CX", cwd:"~/private/sha<b>lo</b>o<b>m</b>-api-astro", rt:"0:51" }
+        ],
+        prev:'ce-inventory · CC · tier 1\n\nEspera permiso para escribir en\nsrc/handlers/inventory.handler.ts\n\n62% de contexto · $2.41',
+        foot:["[enter] saltar","[ctrl-e] mensaje","[esc] cerrar"]
+      },
+      sl:{ mode:"DECK", cwd:"~/private", br:"", r:["filtro: billing","10 sesiones","1 PTY"] }
+    },
+    {
+      m:"M3", title:"Responder sin moverte", keys:"^a m",
+      desc:"Mandás texto a un agente <b>sin robarle el foco al pane donde estás</b>. Ojo con bracketed paste: el texto viaja envuelto en <code>ESC[200~ … ESC[201~</code> o el agente lo interpreta como teclas.",
+      tabs:[{t:"flota"},{t:"billing",on:true},{t:"acme"}],
+      rows:[
+        [ { nm:"nvim  trie.rs", st:"NORMAL", focus:true, body:NVIM } ],
+        [ { nm:"cargo build", st:"8.41s", body:BUILD } ]
+      ],
+      pop:{ low:true, narrow:true,
+        input:{ pr:"→ ce-inventory", q:"sí, pero envolvé el DTO primero", tag:"^a m" },
+        foot:["[enter] enviar","[esc] cancelar","el foco no se mueve"]
+      },
+      sl:{ mode:"NORMAL", cwd:"~/private/agentdeck", br:"main", r:["→ ce-inventory","10 sesiones","1 PTY"] }
+    },
+    {
+      m:"M2", title:"Lanzar y elegir vendor", keys:"^a n · tab",
+      desc:"El producto no supervisa Claude Code, supervisa agentes. <b>El vendor se elige al lanzar</b>, y cada uno declara su tier de fidelidad ahí mismo, antes de que gastes tiempo esperando datos que no va a dar.",
+      tabs:[{t:"flota",on:true},{t:"billing"},{t:"acme"}],
+      empty:{ big:"canvas vacío · 0 PTYs", p:"Las 10 sesiones están gestionadas." },
+      pop:{ narrow:true,
+        vendors:[
+          { b:"Claude Code", s:"tier 1 · hooks", on:true },
+          { b:"Codex", s:"tier 2" },
+          { b:"OpenCode", s:"tier 3 · inferido" }
+        ],
+        input:{ pr:"cwd", q:"~/private/api-tracking-peru", tag:"^a n" },
+        foot:["[tab] vendor","[enter] lanzar gestionado","[^enter] lanzar y materializar"]
+      },
+      sl:{ mode:"DECK", cwd:"~/private", br:"", r:["10 sesiones","0 PTY","120 MB"] }
+    },
+    {
+      m:"M2", title:"Cuando el vendor no coopera", keys:"tier 3",
+      desc:"El adaptador observado es la red de seguridad, y va primero a propósito. Sin stream ni hooks, el estado se infiere de la quiescencia del PTY. <b>Todo lo inferido se marca punteado y en ámbar</b>: la UI degrada, no miente.",
+      tabs:[{t:"flota",on:true},{t:"koach"},{t:"acme"}],
+      rows:[
+        [ { nm:"koach-api", vd:"OC", inf:true, st:"quieto 0:31 · inferido", alert:true,
+            body:'<span class="c">› build ok</span>\n<span class="c">› esperando input…</span>\n\n'
+               + '<span class="a">◌ estado inferido</span>\n'
+               + '<span class="c">  sin stream ni hooks: se deduce de que la\n  salida se detuvo y el prompt volvió.</span>\n\n'
+               + '<span class="c">  sin motivo · sin tokens · sin costo</span>\n\n<span class="curb"></span>' } ]
+      ],
+      fleet:[
+        fi(F.koach,"n","0:31",{mat:true,sel:true,lbl:"inferido"}),
+        fi(F.notes,"w","2:12"),
+        fi(F.inventory,"w","1:12"), fi(F.order,"w","0:42"), fi(F.track,"w","3:08"),
+        fi(F.scout,"w","2:24"), fi(F.probe,"r","1:39"), fi(F.status,"r","0:51"),
+        fi(F.prober,"w","0:18"), fi(F.marvi,"d","12:44")
+      ],
+      sl:{ mode:"DECK", cwd:"~/private/koach-app", br:"", r:["1 inferido","10 sesiones","1 PTY","$18.60+"] }
+    },
+    {
+      m:"§10", title:"El anti-patrón", keys:"materializar todo",
+      desc:"Los mismos diez agentes, diez PTYs. El techo excedido, el presupuesto roto y el statusline en coral. <b>Esta pantalla existe para no construirla:</b> es el riesgo marcado Alto en §10 — si materializar diez panes es un clic, volvés a tmux con otra piel.",
+      tabs:[{t:"flota",on:true},{t:"billing"},{t:"acme"}],
+      warn:{ txt:"techo de PTY excedido · 10 de 2 · 720 MB de 300 MB", hot:true },
+      rows:[
+        [ { nm:"ce-inventory", vd:"CC", st:"espera", alert:true, body:'<span class="f">● permiso</span>\n<span class="e">¿Permitir?</span>' },
+          { nm:"ws-order", vd:"CC", st:"0:42", body:'<span class="c">› jest…</span>\n<span class="cur"></span>' },
+          { nm:"ws-tracking", vd:"CC", st:"3:08", body:'<span class="c">› proto…</span>\n<span class="cur"></span>' } ],
+        [ { nm:"portscout", vd:"CX", st:"espera", alert:true, body:'<span class="f">● push</span>\n<span class="e">¿Permitir?</span>' },
+          { nm:"notes-sync", vd:"OC", inf:true, st:"0:12", body:'<span class="c">› sync…</span>\n<span class="curb"></span>' },
+          { nm:"nestprobe", vd:"CC", st:"1:39", body:'<span class="s">  listo</span>\n<span class="cur"></span>' } ],
+        [ { nm:"web-status", vd:"CX", st:"0:51", body:'<span class="c">› astro build</span>' },
+          { nm:"koach-api", vd:"OC", inf:true, st:"0:31", body:'<span class="a">◌ inferido</span>' },
+          { nm:"prober", vd:"CC", st:"0:18", body:'<span class="c">› probing…</span>' },
+          { nm:"marvisur", vd:"CC", st:"caído", body:'<span class="c">  down</span>' } ]
+      ],
+      sl:{ mode:"DECK", modeHot:true, cwd:"~/private", br:"", r:["10 sesiones","10 PTY ⚠","720 MB ⚠","$18.60+"], hot:true }
+    },
+    {
+      m:"M1", title:"Prefix pendiente", keys:"^a",
+      desc:"El conflicto central del proyecto (§8.4): un pane con foco debe recibir las teclas <b>tal cual</b>. La resolución es un prefix único reservado. Mientras el trie espera el segundo golpe, el statusline lo dice y muestra qué sigue.",
+      tabs:[{t:"flota"},{t:"billing",on:true},{t:"acme"}],
+      rows:[
+        [ { nm:"nvim  trie.rs", st:"NORMAL", focus:true, body:NVIM },
+          { nm:"cargo build", st:"8.41s", body:BUILD } ]
+      ],
+      hint:["u  flota","|  split v","-  split h","n  nuevo agente","d  diff",":  paleta","w  guardar sesión"],
+      sl:{ mode:"^a —", modePend:true, cwd:"~/private/agentdeck", br:"main", r:["esperando tecla","10 sesiones","1 PTY"] }
+    },
+    {
+      m:"M1", title:"Paleta de comandos", keys:"^a :",
+      desc:"Sale casi gratis del bus: <b>toda acción tiene nombre</b>, así que la paleta es búsqueda difusa sobre el registry. Lo mismo que invoca el teclado, la config Lua y — por MCP — los propios agentes.",
+      tabs:[{t:"flota"},{t:"billing",on:true},{t:"acme"}],
+      rows:[ [ { nm:"nvim  trie.rs", st:"NORMAL", body:NVIM } ] ],
+      pop:{
+        input:{ pr:":", q:"work", tag:"CommandRegistry · 84 comandos" },
+        cmds:[
+          { n:"worktree.diff", d:"Diff del trabajo de un agente", k:"^a d", sel:true },
+          { n:"worktree.list", d:"Listar worktrees de la sesión", k:"^a W" },
+          { n:"worktree.merge", d:"Mergear un worktree a su base", k:"" },
+          { n:"worktree.prune", d:"Descartar y limpiar un worktree", k:"" },
+          { n:"workspace.cd", d:"Cambiar el cwd de la sesión", k:"" },
+          { n:"agent.spawn", d:"Lanzar un agente en el cwd actual", k:"^a n" }
+        ],
+        foot:["[enter] ejecutar","[tab] completar","invocable por Lua y por MCP"]
+      },
+      sl:{ mode:"PALETA", cwd:"~/private/agentdeck", br:"main", r:["10 sesiones","1 PTY"] }
+    },
+    {
+      m:"M5", title:"Revisar lo que hizo", keys:"^a d",
+      desc:"Un agente, un worktree. El diff es un tipo de pane más — <b>líneas que se pintan por el mismo path que el terminal</b>, que es la prueba de que el sustrato no es terminal-específico.",
+      tabs:[{t:"flota"},{t:"billing",on:true},{t:"acme"}],
+      rows:[
+        [ { nm:"diff  agent/ce-inventory", st:"+34 −9 · 2 archivos", focus:true, badge:"DIFF", body:DIFF },
+          { nm:"ce-inventory", vd:"CC", st:"listo 0:04", body:'<span class="s">  Listo.</span> Envolví el DTO y awaiteé\n  el commandBus en los 3 handlers.\n\n<span class="c">  12 tests pasan.</span>\n\n<span class="cur"></span>' } ]
+      ],
+      sl:{ mode:"DIFF", cwd:"~/private/billing-api-go", br:"agent/ce-inventory", r:["+34 −9","10 sesiones","1 PTY"] }
+    },
+    {
+      m:"M5", title:"Los worktrees de la flota", keys:"^a W",
+      desc:"Ciudadanos de primera clase: se crean al lanzar el agente y se limpian al cerrarlo. Ver los cinco juntos es lo que te dice <b>qué trabajo hay sin mergear</b> antes de que se te acumule.",
+      tabs:[{t:"flota",on:true},{t:"billing"},{t:"acme"}],
+      rows:[ [ { nm:"worktrees", st:"5 activos", focus:true, badge:"LISTA", body:WORKTREES } ] ],
+      sl:{ mode:"DECK", cwd:"~/private", br:"", r:["5 worktrees","10 sesiones","0 PTY"] }
+    },
+    {
+      m:"M6", title:"Detach — la UI no es el dueño",
+      keys:"agentdeck ls",
+      desc:"Cerraste la ventana y <b>los diez agentes siguen vivos</b> en el daemon. Esta pantalla no es agentdeck: es tu terminal de siempre consultándolo por el socket. Es la razón por la que <code>Command</code> es serializable desde el primer commit (§4.3).",
+      bare:true,
+      rows:[ [ { nm:"alacritty — zsh", st:"", focus:true, body:LS } ] ]
+    },
+    {
+      m:"M7", title:"El editor es un pane",
+      keys:"nvim --embed",
+      desc:"Último por decisión de producto, no por dificultad: hasta acá abrís <code>$EDITOR</code> en un TerminalPane y alcanza. Cuando llegue, <b>no es un subsistema nuevo</b> — es un rope pintado por el mismo <code>PaneContent</code> que el terminal y el diff.",
+      tabs:[{t:"flota"},{t:"agentdeck",on:true},{t:"acme"}],
+      rows:[
+        [ { nm:"editor.rs", st:"NORMAL · 1 error", focus:true, badge:"EDITOR", body:EDITOR },
+          { nm:"ws-order", vd:"CC", st:"0:42 · 62%", body:AGENT_WORK } ]
+      ],
+      sl:{ mode:"NORMAL", cwd:"~/private/agentdeck", br:"main", r:["rust-analyzer","10 sesiones","1 PTY"] }
+    }
+  ];
+
+  /* ---------------- pintor ---------------- */
+  function el(tag, cls, html) {
+    var n = document.createElement(tag);
+    if (cls) { n.className = cls; }
+    if (html != null) { n.innerHTML = html; }
+    return n;
+  }
+
+  function paintPane(p) {
+    var pane = el("div", "pane" + (p.focus ? " focus" : "") + (p.alert ? " alert" : ""));
+    var h = el("div", "ph");
+    h.appendChild(el("span", "nm", p.nm));
+    if (p.vd) { h.appendChild(el("span", "vd" + (p.inf ? " inf" : ""), p.vd)); }
+    if (p.badge) { h.appendChild(el("span", "badge", p.badge)); }
+    h.appendChild(el("span", "st", p.st || ""));
+    pane.appendChild(h);
+    pane.appendChild(el("div", "pb", p.body || ""));
+    return pane;
+  }
+
+  function paintFleet(items) {
+    var f = el("div", "fleet");
+    var head = el("div", "fh", '<span>Flota</span>');
+    head.appendChild(el("span", "cnt", items.length + " sesiones"));
+    f.appendChild(head);
+    var ul = el("ul", "flist");
+    items.forEach(function (a) {
+      var li = el("li", "it " + a.st + (a.mat ? " mat" : "") + (a.sel ? " sel" : "") + (a.q ? " q" : ""));
+      li.appendChild(el("span", "dot"));
+      var who = el("span", "who");
+      var nm = el("span", "nm", a.nm);
+      nm.appendChild(el("span", "vd" + (a.inf ? " inf" : ""), a.vd));
+      who.appendChild(nm);
+      who.appendChild(el("span", "cwd", a.cwd));
+      li.appendChild(who);
+      var LBL = { w:"working", n:"needs you", r:"ready", d:"caído" };
+      var rt = el("span", "rt");
+      rt.appendChild(el("b", null, a.lbl || (a.mat ? "materializado" : LBL[a.st])));
+      rt.appendChild(el("span", null, a.rt));
+      li.appendChild(rt);
+      ul.appendChild(li);
+    });
+    f.appendChild(ul);
+    return f;
+  }
+
+  function paintPop(pop) {
+    var wrapper = document.createDocumentFragment();
+    wrapper.appendChild(el("div", "scrim"));
+    var p = el("div", "pop" + (pop.low ? " low" : "") + (pop.narrow ? " narrow" : ""));
+
+    if (pop.vendors) {
+      var v = el("div", "vendors");
+      pop.vendors.forEach(function (x) {
+        v.appendChild(el("div", x.on ? "on" : null,
+          "<b>" + x.b + "</b><span>" + x.s + "</span>"));
+      });
+      p.appendChild(v);
+    }
+    if (pop.input) {
+      var inp = el("div", "pop-in");
+      inp.appendChild(el("span", "pr", pop.input.pr));
+      inp.appendChild(el("span", "q", pop.input.q + '<span class="cur"></span>'));
+      if (pop.input.tag) { inp.appendChild(el("span", "tag", pop.input.tag)); }
+      p.appendChild(inp);
+    }
+    if (pop.list) {
+      var split = el("div", "pop-split");
+      var ul = el("ul", "pop-list");
+      pop.list.forEach(function (r) {
+        var li = el("li", "it " + r.st + (r.sel ? " sel" : ""));
+        li.appendChild(el("span", "dot"));
+        var who = el("span", "who");
+        var nm = el("span", "nm", r.nm);
+        nm.appendChild(el("span", "vd" + (r.inf ? " inf" : ""), r.vd));
+        who.appendChild(nm);
+        who.appendChild(el("span", "cwd", r.cwd));
+        li.appendChild(who);
+        li.appendChild(el("span", "rt", r.rt));
+        ul.appendChild(li);
+      });
+      split.appendChild(ul);
+      split.appendChild(el("div", "pop-prev", pop.prev || ""));
+      p.appendChild(split);
+    }
+    if (pop.cmds) {
+      var box = el("div");
+      pop.cmds.forEach(function (c) {
+        var row = el("div", "cmdrow" + (c.sel ? " sel" : ""));
+        row.appendChild(el("span", null,
+          '<span class="cn">' + c.n + '</span>  <span class="cd">' + c.d + "</span>"));
+        row.appendChild(el("span", "ck", c.k));
+        box.appendChild(row);
+      });
+      p.appendChild(box);
+    }
+    if (pop.foot) {
+      var ft = el("div", "pop-foot");
+      pop.foot.forEach(function (t) { ft.appendChild(el("span", null, t)); });
+      p.appendChild(ft);
+    }
+    wrapper.appendChild(p);
+    return wrapper;
+  }
+
+  function paintFrame(s) {
+    var fr = el("div", "frame");
+
+    // tabs
+    if (s.tabs) {
+      var tb = el("div", "tabs");
+      s.tabs.forEach(function (t, i) {
+        var tab = el("div", "tab" + (t.on ? " on" : ""));
+        tab.appendChild(el("span", "ti", String(i + 1)));
+        tab.appendChild(el("span", null, t.t));
+        if (t.bell) { tab.appendChild(el("span", "bell")); }
+        tb.appendChild(tab);
+      });
+      tb.appendChild(el("div", "tab grow"));
+      tb.appendChild(el("div", "sess", "agentdeck"));
+      fr.appendChild(tb);
+    } else if (s.bare) {
+      fr.appendChild(el("div", "tabs",
+        '<div class="tab on"><span>zsh</span></div><div class="tab grow"></div>' +
+        '<div class="sess">sin agentdeck</div>'));
+    }
+
+    // subbar: aviso o hint de prefix
+    if (s.warn) {
+      fr.appendChild(el("div", "subbar",
+        '<span class="' + (s.warn.hot ? "hot" : "ok") + '">⚠ ' + s.warn.txt + "</span>"));
+    } else if (s.hint) {
+      var hb = el("div", "subbar");
+      hb.appendChild(el("span", "ok", "^a"));
+      s.hint.forEach(function (t) { hb.appendChild(el("span", null, t)); });
+      fr.appendChild(hb);
+    } else {
+      fr.appendChild(el("div"));
+    }
+
+    // cuerpo
+    var body = el("div", "fbody" + (s.fleet ? " withfleet" : ""));
+    var canvas = el("div", "canvas");
+    if (s.empty) {
+      canvas.appendChild(el("div", "empty",
+        '<p class="big">' + s.empty.big + '</p><p>' + s.empty.p + "</p>"));
+    } else if (s.rows) {
+      s.rows.forEach(function (row) {
+        var r = el("div", "prow");
+        row.forEach(function (p) { r.appendChild(paintPane(p)); });
+        canvas.appendChild(r);
+      });
+    }
+    body.appendChild(canvas);
+    if (s.fleet) { body.appendChild(paintFleet(s.fleet)); }
+    fr.appendChild(body);
+
+    // statusline
+    if (s.sl) {
+      var sl = el("div", "sl" + (s.sl.hot ? " hot" : ""));
+      sl.appendChild(el("span", "mode" + (s.sl.modePend ? " pend" : "") + (s.sl.modeHot ? " hot" : ""),
+        s.sl.mode));
+      sl.appendChild(el("span", null, s.sl.cwd));
+      if (s.sl.br) { sl.appendChild(el("span", "br", " " + s.sl.br)); }
+      var right = el("span", "r");
+      s.sl.r.forEach(function (t) {
+        right.appendChild(el("span", /⚠/.test(t) ? "hot" : null, t));
+      });
+      sl.appendChild(right);
+      fr.appendChild(sl);
+    } else {
+      fr.appendChild(el("div"));
+    }
+
+    if (s.pop) { fr.appendChild(paintPop(s.pop)); }
+    return fr;
+  }
+
+  /* ---------------- montaje ---------------- */
+  var toc = document.getElementById("toc");
+  var host = document.getElementById("screens");
+
+  SCREENS.forEach(function (s, i) {
+    var n = String(i + 1);
+    var nn = n.length < 2 ? "0" + n : n;
+    var id = "s" + n;
+
+    var li = el("li");
+    var a = el("a", null,
+      '<span class="tn">' + nn + '</span>' +
+      '<span class="tt"><b>' + s.title + '</b><span class="tm">' + s.m + " · " + s.keys + "</span></span>");
+    a.href = "#" + id;
+    li.appendChild(a);
+    toc.appendChild(li);
+
+    var sec = el("section", "screen");
+    sec.id = id;
+    var cap = el("div", "cap");
+    cap.appendChild(el("span", "n", nn));
+    var mid = el("span", "mid");
+    mid.appendChild(el("h2", null, s.title));
+    cap.appendChild(mid);
+    mid.appendChild(el("span", "ms", " " + s.m));
+    cap.appendChild(el("span", "keys", s.keys));
+    sec.appendChild(cap);
+    sec.appendChild(el("p", "desc", s.desc));
+    sec.appendChild(paintFrame(s));
+    host.appendChild(sec);
+  });
+})();
+</script>
+</body>
+</html>

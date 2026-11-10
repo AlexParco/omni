@@ -1,0 +1,1003 @@
+<title>agentdeck Prediseño</title>
+<style>
+  :root {
+    --page-bg:#eceada; --page-raised:#f6f5e9; --page-line:#d6d4c2; --page-line-2:#b6b4a2;
+    --page-fg:#141419; --page-mid:#4c4c56; --page-dim:#77777f; --page-accent:#3f5478;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page-bg:#101015; --page-raised:#17171d; --page-line:#26262f; --page-line-2:#373742;
+      --page-fg:#f1f0e1; --page-mid:#adadb6; --page-dim:#84848f; --page-accent:#8199bd;
+    }
+  }
+  :root[data-theme="dark"] {
+    --page-bg:#101015; --page-raised:#17171d; --page-line:#26262f; --page-line-2:#373742;
+    --page-fg:#f1f0e1; --page-mid:#adadb6; --page-dim:#84848f; --page-accent:#8199bd;
+  }
+  :root {
+    --ink:#101015; --slate:#506385; --paper:#f1f0e1; --raised:#17171d; --overlay:#1d1d25;
+    --line:#26262f; --line-2:#373742; --lift:#8199bd; --coral:#d0685c;
+    --mid:#adadb6; --dim:#84848f;
+    --mono: ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace;
+  }
+
+  * { box-sizing:border-box }
+  body {
+    margin:0; background:var(--page-bg); color:var(--page-fg);
+    font-family:var(--mono); font-size:13.5px; line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .wrap { max-width:1010px; margin:0 auto; padding:0 24px 110px }
+
+  header { padding:64px 0 26px; border-bottom:1px solid var(--page-line-2) }
+  h1 { font-size:clamp(22px,3.4vw,34px); font-weight:700; letter-spacing:-.04em;
+       text-transform:uppercase; margin:0 0 14px; line-height:1.05 }
+  .thesis { color:var(--page-mid); max-width:62ch; margin:0 }
+  .thesis strong { color:var(--page-fg) }
+  .meta { margin:18px 0 0; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+          color:var(--page-dim); display:flex; gap:22px; flex-wrap:wrap }
+
+  .flow { margin-top:56px }
+  .flow-head { display:flex; align-items:baseline; gap:14px; padding-bottom:8px;
+               margin-bottom:22px; border-bottom:1px solid var(--page-line) }
+  .flow-head .n { font-size:11px; letter-spacing:.14em; color:var(--page-accent); font-weight:700 }
+  .flow-head h2 { font-size:15px; font-weight:700; margin:0; letter-spacing:-.01em }
+  .flow-head .keys { margin-left:auto; font-size:11.5px; color:var(--page-dim) }
+
+  .step { margin-bottom:28px }
+  .step-lbl { display:flex; align-items:baseline; gap:10px; font-size:11.5px;
+              color:var(--page-mid); margin-bottom:9px }
+  .step-lbl b { color:var(--page-dim); font-weight:700; letter-spacing:.1em; font-variant-numeric:tabular-nums }
+  .kbd { background:var(--page-raised); border:1px solid var(--page-line-2); border-radius:3px;
+         padding:0 5px; font-size:11px; color:var(--page-fg) }
+  .note { font-size:12px; color:var(--page-mid); margin:10px 0 0; max-width:66ch }
+  .note strong { color:var(--page-fg) }
+
+  /* ── ventana: 920 × 580, la proporción de una ventana real ────── */
+  .stage { overflow-x:auto; padding:1px }
+  .app {
+    position:relative; width:920px; height:580px;
+    background:var(--ink); color:var(--paper);
+    border:1px solid var(--line-2); border-radius:8px; overflow:hidden;
+    display:flex; flex-direction:column;
+    font-size:11.5px; line-height:1.55;
+    box-shadow:0 12px 34px -20px rgba(0,0,0,.75);
+  }
+  .canvas { flex:1; display:flex; flex-direction:column; gap:5px; padding:5px; min-height:0 }
+  .row { display:flex; gap:5px; flex:1; min-height:0 }
+
+  .pane { flex:1; min-width:0; border:1px solid var(--line); border-radius:4px;
+          background:var(--ink); display:flex; flex-direction:column; overflow:hidden }
+  .pane.focus { border-color:var(--paper) }
+  .body { padding:6px 9px; white-space:pre; overflow:hidden; flex:1; min-height:0 }
+
+  .ahead { display:flex; align-items:center; gap:7px; padding:2px 8px; font-size:10px;
+           border-bottom:1px solid var(--line); color:var(--dim); flex:none }
+  .ahead .nm { color:var(--mid) }
+  .ahead .vd { font-size:8.5px; letter-spacing:.1em; border:1px solid var(--line-2);
+               border-radius:2px; padding:0 3px }
+  .ahead .vd.t3 { border-style:dashed }
+  .ahead .st { margin-left:auto }
+  .pane.alert { border-color:var(--paper) }
+  .pane.alert .ahead { background:var(--paper); color:var(--ink); border-bottom-color:var(--paper) }
+  .pane.alert .ahead .nm, .pane.alert .ahead .st { color:var(--ink); font-weight:700 }
+  .pane.alert .ahead .vd { color:#4a4a52; border-color:#b9b8ab }
+
+  .sl { display:flex; align-items:center; gap:12px; height:20px; padding:0 9px; flex:none;
+        background:var(--raised); border-top:1px solid var(--line); font-size:10px; color:var(--dim) }
+  .sl .ws { color:var(--mid) }
+  .sl .rt { margin-left:auto; display:flex; gap:12px; align-items:center }
+  .alert-chip { background:var(--paper); color:var(--ink); font-weight:700; padding:0 5px;
+                border-radius:2px }
+  .mode { background:var(--lift); color:var(--ink); font-weight:700; padding:0 6px;
+          border-radius:2px; letter-spacing:.1em }
+
+  .scrim { position:absolute; inset:0; background:rgba(16,16,21,.72) }
+  .pop { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+         background:var(--overlay); border:1px solid var(--line-2); border-radius:6px;
+         overflow:hidden; box-shadow:0 24px 60px -20px #000; width:660px }
+  .pop.narrow { width:460px }
+  .pop-split { display:flex; min-height:0 }
+  .pop-list { width:266px; flex:none; border-right:1px solid var(--line); padding:5px 0 }
+  .pop-prev { flex:1; padding:8px 11px; white-space:pre; overflow:hidden; color:var(--dim); min-width:0 }
+  .pop-in { display:flex; align-items:center; gap:8px; padding:8px 11px;
+            border-bottom:1px solid var(--line); font-size:12px }
+  .pop-foot { padding:5px 11px; border-top:1px solid var(--line); font-size:10px; color:var(--dim) }
+
+  .g { padding:9px 11px 4px; font-size:9.5px; letter-spacing:.18em; text-transform:uppercase;
+       display:flex; align-items:center; gap:6px }
+  .g::after { content:""; flex:1; height:1px; background:currentColor; opacity:.28 }
+  .g.n { color:var(--paper) } .g.w { color:var(--lift) } .g.r { color:var(--slate) }
+
+  .it { padding:4px 11px 5px; display:grid; grid-template-columns:1fr auto; gap:0 8px;
+        border-left:2px solid transparent }
+  .it .t { font-size:11.5px } .it .tm { font-size:10px; color:var(--dim); font-variant-numeric:tabular-nums }
+  .it .sub { grid-column:1/-1; font-size:10px; color:var(--dim); display:flex; gap:6px; align-items:center }
+  .it .vd { font-size:8.5px; letter-spacing:.1em; border:1px solid var(--line-2); border-radius:2px; padding:0 3px }
+  .it .vd.t3 { border-style:dashed }
+  .it .why { grid-column:1/-1; font-size:10px; margin-top:2px }
+  .it.n { background:var(--paper); color:var(--ink); border-left-color:var(--paper) }
+  .it.n .tm, .it.n .sub { color:#4a4a52 } .it.n .vd { border-color:#b9b8ab }
+  .it.n .why, .it.n .t { color:var(--ink); font-weight:700 }
+  .it.w { border-left-color:var(--lift) }
+  .it.r .t { color:var(--mid) }
+  .it.sel { box-shadow:inset 0 0 0 1px var(--line-2) }
+  .it.n.sel { box-shadow:inset 0 0 0 1px var(--paper) }
+
+  .cmd { display:flex; gap:12px; align-items:baseline; padding:4px 11px; font-size:11.5px; color:var(--mid) }
+  .cmd .k { margin-left:auto; font-size:10px; color:var(--dim) }
+  .cmd.on { background:rgba(241,240,225,.1); color:var(--paper) }
+  .cmd.on .c { font-weight:700 }
+
+  .d{color:var(--dim)} .m{color:var(--mid)} .l{color:var(--lift)} .s{color:var(--slate)}
+  .e{color:var(--coral)} .p{color:var(--paper)} .tr{color:var(--line-2)}
+  .cur{display:inline-block;width:6px;height:11px;background:var(--paper);vertical-align:-2px;animation:bl 1.1s steps(1) infinite}
+  .cur.h{background:none;box-shadow:inset 0 0 0 1px var(--dim);animation:none}
+  @keyframes bl{50%{opacity:0}}
+  .dot{display:inline-block;width:5px;height:5px;border-radius:50%;flex:none}
+  .dot.w{background:var(--lift);animation:pu 1.9s ease-in-out infinite}
+  .dot.r{background:var(--slate)}
+  @keyframes pu{0%,100%{opacity:1}50%{opacity:.32}}
+  @media (prefers-reduced-motion:reduce){.cur,.dot.w{animation:none}}
+
+  .ln{color:var(--line-2)} .kw{color:var(--lift)} .str{color:var(--slate)} .cm{color:var(--dim)}
+  .nvsl{display:flex;gap:10px;padding:1px 9px;font-size:9.5px;flex:none;
+        background:var(--raised);color:var(--dim);border-top:1px solid var(--line)}
+  .nvsl .n{background:var(--lift);color:var(--ink);font-weight:700;padding:0 5px}
+
+  .sys{margin-top:72px;padding-top:30px;border-top:1px solid var(--page-line-2)}
+  .rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:1px;
+             background:var(--page-line);border:1px solid var(--page-line);border-radius:5px;
+             overflow:hidden;margin-top:20px}
+  .rule{background:var(--page-raised);padding:14px 16px}
+  .rule h4{margin:0 0 5px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+           color:var(--page-accent);font-weight:700}
+  .rule p{margin:0;font-size:12px;color:var(--page-mid);line-height:1.55}
+  .rule p strong{color:var(--page-fg)}
+
+  .tw{overflow-x:auto;border:1px solid var(--page-line);border-radius:5px;margin-top:20px}
+  table{border-collapse:collapse;width:100%;min-width:580px;font-size:12px}
+  th,td{text-align:left;padding:8px 13px;border-bottom:1px solid var(--page-line);vertical-align:top}
+  th{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--page-dim);
+     font-weight:700;background:var(--page-raised)}
+  tbody tr:last-child td{border-bottom:0}
+  td.k{white-space:nowrap;color:var(--page-fg)}
+  .sw-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:1px;
+          background:var(--page-line);border:1px solid var(--page-line);border-radius:5px;
+          overflow:hidden;margin-top:20px}
+  .sw{background:var(--page-raised)} .sw .c{height:44px}
+  .sw .t{padding:7px 10px 9px}
+  .sw .t b{display:block;font-size:11px;font-weight:400}
+  .sw .t i{display:block;font-style:normal;font-size:10.5px;color:var(--page-dim);text-transform:uppercase}
+  .sw .t u{display:block;text-decoration:none;font-size:10.5px;color:var(--page-mid);margin-top:3px}
+
+  h3{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--page-mid);
+     margin:38px 0 0;font-weight:700}
+  footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--page-line-2);
+         font-size:11px;color:var(--page-dim);display:flex;justify-content:space-between;
+         gap:16px;flex-wrap:wrap}
+</style>
+
+<div class="wrap">
+
+<header>
+  <h1>agentdeck — flujos</h1>
+  <p class="thesis">El flujo de tmux, sin el techo del terminal, y con <strong>menos cromo que
+    tmux</strong>, no más. La regla que gobierna cada pantalla: <strong>si no lo pediste, no está</strong>.
+    Ventanas a 920×580, la proporción real.</p>
+  <div class="meta"><span>M3 · MVP</span><span>10 flujos</span><span>CC · CX · OC</span><span>2026-08-17</span></div>
+</header>
+
+<!-- ═══ 01 ═══ -->
+<div class="flow">
+  <div class="flow-head"><span class="n">01</span><h2>Reposo</h2><span class="keys">sin teclas</span></div>
+  <div class="step">
+    <div class="stage"><div class="app">
+      <div class="canvas">
+        <div class="row"><div class="pane focus">
+          <div class="body"><span class="ln"> 12</span> <span class="kw">impl</span> Trie {
+<span class="ln"> 13</span>     <span class="cm">/// Avanza un paso. `Miss` cae al pane sin tocarse.</span>
+<span class="ln"> 14</span>     <span class="kw">pub fn</span> <span class="p">step</span>(&amp;<span class="kw">mut self</span>, key: KeyEvent) -&gt; Step {
+<span class="ln"> 15</span>         <span class="kw">let</span> node = <span class="kw">match self</span>.cursor.take() {
+<span class="ln"> 16</span>             Some(n) =&gt; n,
+<span class="ln"> 17</span>             None =&gt; <span class="kw">self</span>.root.clone(),
+<span class="ln"> 18</span>         };
+<span class="ln"> 19</span>
+<span class="ln"> 20</span>         <span class="kw">match</span> node.children.get(&amp;key) {
+<span class="ln"> 21</span>             Some(Node::Leaf(cmd)) =&gt; {
+<span class="ln"> 22</span>                 <span class="kw">self</span>.reset();
+<span class="ln"> 23</span>                 Step::Hit(cmd.clone())
+<span class="ln"> 24</span>             }
+<span class="ln"> 25</span>             Some(branch) =&gt; {
+<span class="ln"> 26</span>                 <span class="kw">self</span>.cursor = Some(branch.clone());
+<span class="ln"> 27</span>                 Step::Pending
+<span class="ln"> 28</span>             }
+<span class="ln"> 29</span>             None =&gt; {
+<span class="ln"> 30</span>                 <span class="kw">self</span>.reset();
+<span class="ln"> 31</span>                 Step::Miss
+<span class="ln"> 32</span>             }
+<span class="ln"> 33</span>         }
+<span class="ln"> 34</span>     }
+<span class="ln"> 35</span>
+<span class="ln"> 36</span>     <span class="kw">fn</span> <span class="p">reset</span>(&amp;<span class="kw">mut self</span>) {
+<span class="ln"> 37</span>         <span class="kw">self</span>.cursor = None;<span class="cur"></span>
+<span class="ln"> 38</span>     }
+<span class="ln"> 39</span> }
+</div>
+          <div class="nvsl"><span class="n">NORMAL</span><span>keymap/src/trie.rs</span><span class="d">rust · lsp</span><span style="margin-left:auto">37:26</span></div>
+        </div></div>
+        <div class="row" style="flex:0 0 122px"><div class="pane">
+          <div class="body"><span class="d">$</span> cargo test -p keymap
+   <span class="l">Compiling</span> <span class="m">agentdeck-keymap v0.1.0</span>
+    <span class="l">Finished</span> <span class="d">test profile in 3.94s</span>
+     <span class="l">Running</span> <span class="d">unittests src/lib.rs</span>
+
+<span class="d">test</span> trie::pending_then_hit <span class="d">...</span> <span class="l">ok</span>
+<span class="d">test</span> trie::miss_falls_through <span class="d">...</span> <span class="l">ok</span>
+<span class="d">test</span> trie::prefix_literal_escape <span class="d">...</span> <span class="l">ok</span>
+
+<span class="d">test result:</span> <span class="l">ok</span><span class="d">. 3 passed; 0 failed</span>
+
+<span class="d">$</span> <span class="cur h"></span></div>
+        </div></div>
+      </div>
+      <div class="sl"><span class="ws">acme</span><span>2/4</span></div>
+    </div></div>
+    <p class="note">Dos panes y una línea de 20px con el workspace y la posición de tab.
+      <strong>Sin barra de pestañas, sin panel lateral, sin títulos de pane.</strong> Nvim se
+      identifica por su statusline; la shell, por su prompt. El borde de papel marca el foco —
+      es todo el cromo que existe.</p>
+  </div>
+</div>
+
+<!-- ═══ 02 ═══ -->
+<div class="flow">
+  <div class="flow-head"><span class="n">02</span><h2>Tres vendors, una sola pantalla</h2><span class="keys">CC · CX · OC</span></div>
+  <div class="step">
+    <div class="stage"><div class="app">
+      <div class="canvas"><div class="row">
+
+        <div class="pane">
+          <div class="ahead"><span class="dot w"></span><span class="nm">ws-order</span><span class="vd">CC</span><span class="st">0:42 · 62% · $2.41</span></div>
+          <div class="body"><span class="l">●</span> <span class="m">Read</span><span class="d">(order.entity.ts)</span>
+  <span class="tr">⎿</span> <span class="d">218 líneas</span>
+
+<span class="l">●</span> <span class="m">Edit</span><span class="d">(create.use-case.ts)</span>
+  <span class="tr">⎿</span> <span class="d">3 adiciones, 1 remoción</span>
+
+<span class="l">●</span> <span class="m">Bash</span><span class="d">(pnpm test order)</span>
+  <span class="tr">⎿</span> <span class="d">corriendo…</span>
+
+<span class="d">  El mapper ya existía, así que</span>
+<span class="d">  lo reusé en vez de mapear</span>
+<span class="d">  inline en el use-case.</span>
+
+
+
+
+<span class="tr">╭────────────────────────────╮</span>
+<span class="tr">│</span> <span class="d">&gt;</span>                          <span class="tr">│</span>
+<span class="tr">╰────────────────────────────╯</span>
+  <span class="d">⏵⏵ accept edits</span>   <span class="d">62%</span></div>
+        </div>
+
+        <div class="pane">
+          <div class="ahead"><span class="dot w"></span><span class="nm">ws-stock</span><span class="vd">CX</span><span class="st">1:24</span></div>
+          <div class="body"><span class="m">• Muevo el cálculo de stock al</span>
+<span class="m">  dominio y dejo el datasource</span>
+<span class="m">  solo con persistencia.</span>
+
+  <span class="d">proposed patch</span>
+  <span class="d">src/stock/stock.entity.ts</span>
+  <span class="d">@@ -42,6 +42,11 @@</span>
+  <span class="e">-  get available() {</span>
+  <span class="e">-    return this.qty</span>
+  <span class="e">-  }</span>
+  <span class="l">+  get available(): number {</span>
+  <span class="l">+    return this.qty - this.held</span>
+  <span class="l">+  }</span>
+
+  <span class="d">Apply this change?</span>
+  <span class="p">[y]</span> <span class="d">yes</span>  <span class="d">[n] no</span>
+
+<span class="tr">┌────────────────────────────┐</span>
+<span class="tr">│</span> <span class="d">›</span>                          <span class="tr">│</span>
+<span class="tr">└────────────────────────────┘</span>
+ <span class="d">esc interrupt · /review · auto</span></div>
+        </div>
+
+        <div class="pane">
+          <div class="ahead"><span class="dot w"></span><span class="nm">portscout</span><span class="vd">OC</span><span class="st">3:08</span></div>
+          <div class="body"><span class="l">▌</span> <span class="d">build</span>
+<span class="l">▌</span> <span class="m">agregá el escaneo concurrente</span>
+<span class="l">▌</span> <span class="m">con un pool de 64</span>
+
+  <span class="d">edit</span>  <span class="m">scanner/pool.go</span>
+        <span class="l">+48</span> <span class="e">-6</span>
+  <span class="d">edit</span>  <span class="m">scanner/scan.go</span>
+        <span class="l">+12</span> <span class="e">-3</span>
+  <span class="d">bash</span>  <span class="m">go test ./...</span>
+        <span class="d">ok  scanner  0.42s</span>
+
+<span class="m">Listo. El pool cierra por context</span>
+<span class="m">y los resultados salen por canal.</span>
+
+
+
+<span class="d">&gt;</span> <span class="d">@scanner/pool.go</span> <span class="cur h"></span>
+<span class="tr">────────────────────────────────</span>
+ <span class="d">^x help  ^p palette</span>   <span class="d">build</span></div>
+        </div>
+
+      </div></div>
+      <div class="sl"><span class="ws">acme</span><span>3/4</span><span class="rt"><span class="d">3 agentes · 3 vendors</span></span></div>
+    </div></div>
+    <p class="note"><strong>agentdeck no reskinea nada.</strong> Cada TUI corre en su PTY y se pinta
+      tal cual: Claude Code con sus <code>●</code> y <code>⎿</code>, Codex con su patch y su
+      <code>[y]/[n]</code>, OpenCode con su gutter y su leader <code>^x</code>. Lo único que
+      agentdeck agrega es <strong>la línea de arriba</strong> — idéntica en los tres.</p>
+    <p class="note">Ahí se ve el tier: Claude Code (tier 1) reporta contexto y costo; Codex y
+      OpenCode solo estado y tiempo. <strong>La línea no rellena con «—» lo que no sabe: lo omite.</strong></p>
+  </div>
+</div>
+
+<!-- ═══ 03 ═══ -->
+<div class="flow">
+  <div class="flow-head"><span class="n">03</span><h2>Tres formas de pedir permiso, un estado</h2><span class="keys">normalización</span></div>
+  <div class="step">
+    <div class="stage"><div class="app">
+      <div class="canvas"><div class="row">
+
+        <div class="pane alert">
+          <div class="ahead"><span class="nm">ce-inventory</span><span class="vd">CC</span><span class="st">espera 1:12</span></div>
+          <div class="body"><span class="m">Limpio el build anterior antes</span>
+<span class="m">de recompilar.</span>
+
+<span class="p">▲</span> <span class="m">Bash</span> <span class="d">quiere ejecutar</span>
+  <span class="tr">⎿</span> <span class="d">rm -rf dist/</span>
+
+<span class="p">❯ 1. Sí</span>
+<span class="d">  2. Sí, y no preguntar más</span>
+<span class="d">     para Bash</span>
+<span class="d">  3. No, dime qué hacer</span>
+
+
+
+
+<span class="tr">╭────────────────────────────╮</span>
+<span class="tr">│</span> <span class="d">&gt;</span>                          <span class="tr">│</span>
+<span class="tr">╰────────────────────────────╯</span></div>
+        </div>
+
+        <div class="pane alert">
+          <div class="ahead"><span class="nm">ws-stock</span><span class="vd">CX</span><span class="st">espera 0:06</span></div>
+          <div class="body"><span class="m">• Necesito correr la migración</span>
+<span class="m">  contra la base local.</span>
+
+  <span class="d">command</span>
+  <span class="d">pnpm prisma migrate dev</span>
+
+  <span class="d">Fuera del workspace.</span>
+  <span class="d">Requiere aprobación.</span>
+
+  <span class="p">[y]</span> <span class="d">yes</span>
+  <span class="d">[n] no</span>
+  <span class="d">[a] always for session</span>
+
+
+
+<span class="tr">┌────────────────────────────┐</span>
+<span class="tr">│</span> <span class="d">›</span>                          <span class="tr">│</span>
+<span class="tr">└────────────────────────────┘</span></div>
+        </div>
+
+        <div class="pane alert">
+          <div class="ahead"><span class="nm">video-finder</span><span class="vd t3">AI</span><span class="st">espera 0:51</span></div>
+          <div class="body"><span class="d">&gt; aplicar edits a downloader.py?</span>
+<span class="d">  (Y)es/(N)o/(A)ll [Yes]:</span> <span class="cur"></span>
+
+
+
+
+
+
+
+
+
+<span class="tr">────────────────────────────────</span>
+ <span class="d">aider · sin adaptador propio</span>
+ <span class="d">estado inferido del PTY</span></div>
+        </div>
+
+      </div></div>
+      <div class="sl">
+        <span class="ws">acme</span><span>3/4</span>
+        <span class="rt"><span class="alert-chip">3</span></span>
+      </div>
+    </div></div>
+    <p class="note">Tres protocolos distintos — menú numerado, <code>[y/n/a]</code>, y un prompt de
+      texto plano — que el adaptador normaliza al <strong>mismo <code>AgentState::NeedsYou</code></strong>.
+      Por eso los tres panes invierten su barra igual y el contador de la statusline dice 3.</p>
+    <p class="note">El tercero es <strong>tier 3</strong>: aider no tiene adaptador propio, así que
+      el estado se infiere de la quiescencia del PTY. La etiqueta de vendor va
+      <strong>punteada</strong> para que sepas que ese dato es inferido, no reportado.</p>
+  </div>
+</div>
+
+<!-- ═══ 04 ═══ -->
+<div class="flow">
+  <div class="flow-head"><span class="n">04</span><h2>Un agente te necesita</h2><span class="keys">^a u</span></div>
+
+  <div class="step">
+    <div class="step-lbl"><b>4.1</b> la única señal ambiente</div>
+    <div class="stage"><div class="app">
+      <div class="canvas">
+        <div class="row"><div class="pane focus">
+          <div class="body"><span class="ln"> 12</span> <span class="kw">impl</span> Trie {
+<span class="ln"> 13</span>     <span class="cm">/// Avanza un paso. `Miss` cae al pane sin tocarse.</span>
+<span class="ln"> 14</span>     <span class="kw">pub fn</span> <span class="p">step</span>(&amp;<span class="kw">mut self</span>, key: KeyEvent) -&gt; Step {
+<span class="ln"> 15</span>         <span class="kw">let</span> node = <span class="kw">match self</span>.cursor.take() {
+<span class="ln"> 16</span>             Some(n) =&gt; n,
+<span class="ln"> 17</span>             None =&gt; <span class="kw">self</span>.root.clone(),
+<span class="ln"> 18</span>         };
+<span class="ln"> 19</span>
+<span class="ln"> 20</span>         <span class="kw">match</span> node.children.get(&amp;key) {
+<span class="ln"> 21</span>             Some(Node::Leaf(cmd)) =&gt; {
+<span class="ln"> 22</span>                 <span class="kw">self</span>.reset();
+<span class="ln"> 23</span>                 Step::Hit(cmd.clone())
+<span class="ln"> 24</span>             }
+<span class="ln"> 25</span>             Some(branch) =&gt; {
+<span class="ln"> 26</span>                 <span class="kw">self</span>.cursor = Some(branch.clone());
+<span class="ln"> 27</span>                 Step::Pending
+<span class="ln"> 28</span>             }
+<span class="ln"> 29</span>             None =&gt; {
+<span class="ln"> 30</span>                 <span class="kw">self</span>.reset();
+<span class="ln"> 31</span>                 Step::Miss
+<span class="ln"> 32</span>             }
+<span class="ln"> 33</span>         }
+<span class="ln"> 34</span>     }
+<span class="ln"> 35</span>
+<span class="ln"> 36</span>     <span class="kw">fn</span> <span class="p">reset</span>(&amp;<span class="kw">mut self</span>) {
+<span class="ln"> 37</span>         <span class="kw">self</span>.cursor = None;<span class="cur"></span>
+<span class="ln"> 38</span>     }
+<span class="ln"> 39</span> }
+</div>
+          <div class="nvsl"><span class="n">NORMAL</span><span>keymap/src/trie.rs</span><span class="d">rust · lsp</span><span style="margin-left:auto">37:26</span></div>
+        </div></div>
+        <div class="row" style="flex:0 0 122px"><div class="pane">
+          <div class="body"><span class="d">$</span> cargo test -p keymap
+    <span class="l">Finished</span> <span class="d">test profile in 3.94s</span>
+
+<span class="d">test</span> trie::pending_then_hit <span class="d">...</span> <span class="l">ok</span>
+<span class="d">test</span> trie::miss_falls_through <span class="d">...</span> <span class="l">ok</span>
+<span class="d">test</span> trie::prefix_literal_escape <span class="d">...</span> <span class="l">ok</span>
+
+<span class="d">test result:</span> <span class="l">ok</span><span class="d">. 3 passed; 0 failed</span>
+
+<span class="d">$</span> <span class="cur h"></span></div>
+        </div></div>
+      </div>
+      <div class="sl"><span class="ws">acme</span><span>2/4</span><span class="rt"><span class="alert-chip">1</span></span></div>
+    </div></div>
+    <p class="note">Un agente en otro workspace pidió permiso. <strong>Lo único que cambió en toda
+      la pantalla es un carácter invertido en la esquina.</strong> Sin toast, sin panel que se
+      abre, sin robo de foco. Sabes que hay trabajo tuyo y decides cuándo.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-lbl"><b>4.2</b> abres la flota <span class="kbd">^a u</span></div>
+    <div class="stage"><div class="app">
+      <div class="canvas" style="filter:blur(1.4px);opacity:.5">
+        <div class="row"><div class="pane"><div class="body"><span class="ln"> 12</span> <span class="kw">impl</span> Trie {
+<span class="ln"> 13</span>     <span class="cm">/// Avanza un paso.</span>
+<span class="ln"> 14</span>     <span class="kw">pub fn</span> step(&amp;<span class="kw">mut self</span>, key: KeyEvent) -&gt; Step {
+<span class="ln"> 15</span>         <span class="kw">let</span> node = <span class="kw">match self</span>.cursor.take() {
+<span class="ln"> 16</span>             Some(n) =&gt; n,
+<span class="ln"> 17</span>             None =&gt; <span class="kw">self</span>.root.clone(),
+<span class="ln"> 18</span>         };
+<span class="ln"> 19</span>
+<span class="ln"> 20</span>         <span class="kw">match</span> node.children.get(&amp;key) {
+</div></div></div>
+        <div class="row" style="flex:0 0 100px"><div class="pane"><div class="body"><span class="d">$</span></div></div></div>
+      </div>
+      <div class="scrim"></div>
+      <div class="pop">
+        <div class="pop-in"><span class="d">/</span><span class="d">filtrar…</span><span class="cur"></span></div>
+        <div class="pop-split">
+          <div class="pop-list">
+            <div class="g n">▲ te necesita</div>
+            <div class="it n sel">
+              <div class="t">ce-inventory-sync</div><div class="tm">1:12</div>
+              <div class="sub"><span class="vd">CC</span>~/acme/ces/ce-inventory</div>
+              <div class="why">permiso · rm -rf dist/</div>
+            </div>
+            <div class="g w">● trabajando</div>
+            <div class="it w"><div class="t">ws-order</div><div class="tm">0:42</div>
+              <div class="sub"><span class="vd">CC</span>~/acme/services/ws-order</div></div>
+            <div class="it w"><div class="t">ws-stock</div><div class="tm">1:24</div>
+              <div class="sub"><span class="vd">CX</span>~/acme/services/ws-stock</div></div>
+            <div class="it w"><div class="t">portscout</div><div class="tm">3:08</div>
+              <div class="sub"><span class="vd">OC</span>~/private/portscout</div></div>
+            <div class="it w"><div class="t">video-finder</div><div class="tm">0:51</div>
+              <div class="sub"><span class="vd t3">AI</span>~/private/video-finder</div></div>
+            <div class="g r">○ listo</div>
+            <div class="it r"><div class="t">billing-status</div><div class="tm">—</div>
+              <div class="sub"><span class="vd">CC</span>~/private/billing-status</div></div>
+          </div>
+          <div class="pop-prev"><span class="m">Limpio el build anterior antes de</span>
+<span class="m">recompilar.</span>
+
+<span class="p">▲</span> <span class="m">Bash</span> <span class="d">quiere ejecutar</span>
+  <span class="tr">⎿</span> <span class="d">rm -rf dist/</span>
+
+<span class="p">❯ 1. Sí</span>
+<span class="d">  2. Sí, y no preguntar más</span>
+<span class="d">  3. No, dime qué hacer</span>
+
+<span class="tr">───────────────────────────</span>
+<span class="d">tier 1 · ctx 62% · $2.41</span>
+<span class="d">worktree agent/ce-inventory</span></div>
+        </div>
+        <div class="pop-foot">↑↓ mover · enter saltar · ^e mensaje · ^k matar · esc</div>
+      </div>
+      <div class="sl"><span class="mode">FLOTA</span><span class="ws">6 sesiones · 4 vendors</span>
+        <span class="rt"><span class="alert-chip">1</span></span></div>
+    </div></div>
+    <p class="note">Aquí sí hay densidad — <strong>porque la pediste</strong>. Seis sesiones de cuatro
+      vendors ordenadas por urgencia, con preview en vivo. Es la forma de tu popup de
+      <code>tmux-cc-sessions</code>, sin los límites de fzf.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-lbl"><b>4.3</b> saltas <span class="kbd">enter</span></div>
+    <div class="stage"><div class="app">
+      <div class="canvas"><div class="row"><div class="pane alert focus">
+        <div class="ahead"><span class="nm">ce-inventory-sync</span><span class="vd">CC</span><span class="st">espera 1:12 · 62% · $0.88</span></div>
+        <div class="body"><span class="m">Limpio el build anterior antes de recompilar.</span>
+
+<span class="l">●</span> <span class="m">Read</span><span class="d">(package.json)</span>
+  <span class="tr">⎿</span> <span class="d">44 líneas</span>
+
+<span class="l">●</span> <span class="m">Bash</span><span class="d">(ls -la dist/)</span>
+  <span class="tr">⎿</span> <span class="d">total 12 · assets -&gt; ../shared/assets</span>
+
+<span class="p">▲</span> <span class="m">Bash</span> <span class="d">quiere ejecutar</span>
+  <span class="tr">⎿</span> <span class="d">rm -rf dist/</span>
+
+<span class="p">❯ 1. Sí</span>
+<span class="d">  2. Sí, y no preguntar más para Bash</span>
+<span class="d">  3. No, dime qué hacer</span>
+
+
+
+
+<span class="tr">╭──────────────────────────────────────────────────────╮</span>
+<span class="tr">│</span> <span class="d">&gt;</span>                                                    <span class="tr">│</span>
+<span class="tr">╰──────────────────────────────────────────────────────╯</span>
+  <span class="d">⏵⏵ accept edits on</span>                          <span class="d">ctx 62%</span></div>
+      </div></div></div>
+      <div class="sl"><span class="ws">acme</span><span>3/4</span></div>
+    </div></div>
+    <p class="note"><strong>El pane de agente es el único con encabezado</strong>, porque es lo único
+      que no se identifica por su contenido. En cuanto respondes, el chip de la statusline
+      desaparece: la señal existe mientras hay algo que hacer.</p>
+  </div>
+</div>
+
+<!-- ═══ 05 ═══ -->
+<div class="flow">
+  <div class="flow-head"><span class="n">05</span><h2>Responder sin moverte</h2><span class="keys">^a m</span></div>
+  <div class="step">
+    <div class="stage"><div class="app">
+      <div class="canvas"><div class="row"><div class="pane focus">
+        <div class="body"><span class="ln"> 12</span> <span class="kw">impl</span> Trie {
+<span class="ln"> 13</span>     <span class="cm">/// Avanza un paso. `Miss` cae al pane sin tocarse.</span>
+<span class="ln"> 14</span>     <span class="kw">pub fn</span> <span class="p">step</span>(&amp;<span class="kw">mut self</span>, key: KeyEvent) -&gt; Step {
+<span class="ln"> 15</span>         <span class="kw">let</span> node = <span class="kw">match self</span>.cursor.take() {
+<span class="ln"> 16</span>             Some(n) =&gt; n,
+<span class="ln"> 17</span>             None =&gt; <span class="kw">self</span>.root.clone(),
+<span class="ln"> 18</span>         };
+<span class="ln"> 19</span>
+<span class="ln"> 20</span>         <span class="kw">match</span> node.children.get(&amp;key) {
+<span class="ln"> 21</span>             Some(Node::Leaf(cmd)) =&gt; {
+<span class="ln"> 22</span>                 <span class="kw">self</span>.reset();
+<span class="ln"> 23</span>                 Step::Hit(cmd.clone())
+<span class="ln"> 24</span>             }
+<span class="ln"> 25</span>             Some(branch) =&gt; {
+<span class="ln"> 26</span>                 <span class="kw">self</span>.cursor = Some(branch.clone());
+<span class="ln"> 27</span>                 Step::Pending
+<span class="ln"> 28</span>             }
+<span class="ln"> 29</span>             None =&gt; {
+<span class="ln"> 30</span>                 <span class="kw">self</span>.reset();
+<span class="ln"> 31</span>                 Step::Miss
+<span class="ln"> 32</span>             }
+<span class="ln"> 33</span>         }
+<span class="ln"> 34</span>     }
+<span class="ln"> 35</span> }<span class="cur"></span>
+</div>
+        <div class="nvsl"><span class="n">NORMAL</span><span>keymap/src/trie.rs</span><span class="d">rust · lsp</span><span style="margin-left:auto">35:2</span></div>
+      </div></div></div>
+      <div class="pop narrow" style="top:auto;bottom:30px;transform:translate(-50%,0)">
+        <div class="pop-in"><span class="p">▲</span><span class="m">ce-inventory-sync</span>
+          <span class="d" style="margin-left:auto;font-size:10px">CC · ~/acme/ces/ce-inventory</span></div>
+        <div style="padding:9px 11px;font-size:11.5px;line-height:1.55">no borres dist/, solo el contenido —
+el símlink de assets lo necesita<span class="cur"></span></div>
+        <div class="pop-foot">enter mandar · ^enter mandar y saltar · esc descartar</div>
+      </div>
+      <div class="sl"><span class="mode">MENSAJE</span><span class="ws">→ ce-inventory-sync</span>
+        <span class="rt"><span class="d">el foco no se mueve</span></span></div>
+    </div></div>
+    <p class="note">Sin scrim y anclado abajo: <strong>el compositor no tapa lo que estabas
+      mirando</strong>, porque el punto es no perder el hilo. Escribe en el PTY destino con
+      bracketed paste; tu cursor sigue en nvim, línea 35. Es lo que tmux no puede hacer sin
+      sacarte del pane.</p>
+  </div>
+</div>
+
+<!-- ═══ 06 ═══ -->
+<div class="flow">
+  <div class="flow-head"><span class="n">06</span><h2>Lanzar y elegir vendor</h2><span class="keys">^a n · tab</span></div>
+  <div class="step">
+    <div class="stage"><div class="app">
+      <div class="canvas" style="filter:blur(1.4px);opacity:.45">
+        <div class="row"><div class="pane"><div class="body"><span class="ln"> 12</span> <span class="kw">impl</span> Trie {
+<span class="ln"> 13</span>     <span class="kw">pub fn</span> step(&amp;<span class="kw">mut self</span>, key: KeyEvent) -&gt; Step {
+<span class="ln"> 14</span>         <span class="kw">let</span> node = <span class="kw">match self</span>.cursor.take() {
+</div></div></div>
+      </div>
+      <div class="scrim"></div>
+      <div class="pop narrow">
+        <div class="pop-in"><span class="l">❯</span><span>ws-</span><span class="cur"></span></div>
+        <div class="cmd on"><span class="c">ws-order</span><span class="d">~/acme/services</span><span class="k">main · limpio</span></div>
+        <div class="cmd"><span class="c">ws-hook</span><span class="d">~/acme/services</span><span class="k">main · 2 sin commit</span></div>
+        <div class="cmd"><span class="c">ws-stock</span><span class="d">~/acme/services</span><span class="k">main · limpio</span></div>
+        <div class="pop-foot" style="display:flex;gap:14px">
+          <span>agente</span>
+          <span class="p" style="background:var(--paper);color:var(--ink);padding:0 5px;border-radius:2px;font-weight:700">claude</span>
+          <span class="d">codex</span><span class="d">opencode</span><span class="d">aider</span>
+          <span style="margin-left:auto">tab cambia · enter lanza</span>
+        </div>
+      </div>
+      <div class="sl"><span class="mode">LANZAR</span><span class="ws">worktree nuevo</span>
+        <span class="rt"><span class="d">agent/ws-order</span></span></div>
+    </div></div>
+    <p class="note">Eliges repo, no directorio: cada agente arranca en <strong>su propio git
+      worktree</strong>, así que dos agentes sobre el mismo repo no se pisan. El vendor se cambia
+      con <span class="kbd">tab</span> sin salir del popup — la lista sale de los adaptadores
+      registrados, no está hardcodeada.</p>
+  </div>
+</div>
+
+<!-- ═══ 07 ═══ -->
+<div class="flow">
+  <div class="flow-head"><span class="n">07</span><h2>Revisar lo que hizo</h2><span class="keys">^a d</span></div>
+  <div class="step">
+    <div class="stage"><div class="app">
+      <div class="canvas"><div class="row">
+        <div class="pane">
+          <div class="ahead"><span class="dot r"></span><span class="nm">ws-order</span><span class="vd">CC</span><span class="st">listo · +34 −8 · 3 archivos</span></div>
+          <div class="body"><span class="p">▸</span> <span class="m">src/order/create.use-case.ts</span> <span class="l">+12</span> <span class="e">−4</span>
+<span class="d">@@ -18,6 +18,9 @@</span>
+   <span class="d">async execute(dto: CreateOrderDto) {</span>
+ <span class="e">-    const o = await this.repo.save(dto)</span>
+ <span class="l">+    const entity = OrderMapper.toEntity(dto)</span>
+ <span class="l">+    const o = await this.repo.save(entity)</span>
+ <span class="l">+    await this.events.emit(</span>
+ <span class="l">+      new OrderCreated(o.id, o.total))</span>
+   <span class="d">    return o</span>
+   <span class="d">}</span>
+
+<span class="d">▸</span> <span class="m">src/order/order.mapper.ts</span> <span class="l">+18</span> <span class="e">−0</span>
+<span class="d">▸</span> <span class="m">src/order/order.events.ts</span> <span class="l">+4</span> <span class="e">−4</span>
+
+<span class="tr">──────────────────────────────</span>
+<span class="d">j k mover · enter abrir en nvim</span>
+<span class="d">^a a aceptar · ^a x descartar</span></div>
+        </div>
+        <div class="pane focus">
+          <div class="body"><span class="ln"> 14</span> <span class="kw">import</span> { OrderMapper } <span class="kw">from</span> <span class="str">'./order.mapper'</span>
+<span class="ln"> 15</span> <span class="kw">import</span> { OrderCreated } <span class="kw">from</span> <span class="str">'./order.events'</span>
+<span class="ln"> 16</span>
+<span class="ln"> 17</span> <span class="kw">export class</span> CreateOrderUseCase {
+<span class="ln"> 18</span>   <span class="kw">async</span> execute(dto: CreateOrderDto) {
+<span class="ln"> 19</span>     <span class="kw">const</span> entity = OrderMapper.toEntity(dto)
+<span class="ln"> 20</span>     <span class="kw">const</span> o = <span class="kw">await this</span>.repo.save(entity)<span class="cur"></span>
+<span class="ln"> 21</span>     <span class="kw">await this</span>.events.emit(
+<span class="ln"> 22</span>       <span class="kw">new</span> OrderCreated(o.id, o.total))
+<span class="ln"> 23</span>     <span class="kw">return</span> o
+<span class="ln"> 24</span>   }
+<span class="ln"> 25</span> }
+</div>
+          <div class="nvsl"><span class="n">NORMAL</span><span>create.use-case.ts</span><span class="d">agent/ws-order</span><span style="margin-left:auto">20:38</span></div>
+        </div>
+      </div></div>
+      <div class="sl"><span class="ws">acme</span><span>3/4</span><span class="rt"><span class="d">worktree agent/ws-order</span></span></div>
+    </div></div>
+    <p class="note">El diff es otro tipo de pane sobre el mismo contrato de render, y
+      <span class="kbd">enter</span> abre <strong>ese archivo, en esa línea, en nvim</strong>, al lado.
+      La navegación diff↔editor pasa por el bus de comandos — así que un agente también puede
+      provocarla.</p>
+  </div>
+</div>
+
+<!-- ═══ 08 ═══ -->
+<div class="flow">
+  <div class="flow-head"><span class="n">08</span><h2>Prefix y paleta</h2><span class="keys">^a · ^a :</span></div>
+
+  <div class="step">
+    <div class="step-lbl"><b>8.1</b> prefix pendiente <span class="kbd">^a</span></div>
+    <div class="stage"><div class="app">
+      <div class="canvas" style="opacity:.8">
+        <div class="row"><div class="pane"><div class="body"><span class="ln"> 12</span> <span class="kw">impl</span> Trie {
+<span class="ln"> 13</span>     <span class="cm">/// Avanza un paso. `Miss` cae al pane sin tocarse.</span>
+<span class="ln"> 14</span>     <span class="kw">pub fn</span> step(&amp;<span class="kw">mut self</span>, key: KeyEvent) -&gt; Step {
+<span class="ln"> 15</span>         <span class="kw">let</span> node = <span class="kw">match self</span>.cursor.take() {
+<span class="ln"> 16</span>             Some(n) =&gt; n,
+<span class="ln"> 17</span>             None =&gt; <span class="kw">self</span>.root.clone(),
+<span class="ln"> 18</span>         };
+<span class="ln"> 19</span>
+<span class="ln"> 20</span>         <span class="kw">match</span> node.children.get(&amp;key) {
+<span class="ln"> 21</span>             Some(Node::Leaf(cmd)) =&gt; {
+<span class="ln"> 22</span>                 <span class="kw">self</span>.reset();
+<span class="ln"> 23</span>                 Step::Hit(cmd.clone())
+<span class="ln"> 24</span>             }
+</div></div></div>
+      </div>
+      <div class="pop narrow" style="top:auto;bottom:30px;transform:translate(-50%,0)">
+        <div class="cmd"><span class="c">u</span><span>flota</span><span class="k">fleet.open</span></div>
+        <div class="cmd"><span class="c">n</span><span>agente nuevo</span><span class="k">agent.spawn</span></div>
+        <div class="cmd"><span class="c">m</span><span>mensaje sin robar foco</span><span class="k">agent.compose</span></div>
+        <div class="cmd"><span class="c">d</span><span>diff del worktree</span><span class="k">diff.show</span></div>
+        <div class="cmd"><span class="c">s v</span><span>dividir</span><span class="k">pane.split</span></div>
+        <div class="cmd"><span class="c">w</span><span>cambiar workspace</span><span class="k">ws.pick</span></div>
+        <div class="pop-foot"><span class="p">^a ^a</span> manda el prefix literal al pane · esc</div>
+      </div>
+      <div class="sl"><span class="mode">^a …</span><span class="ws">esperando tecla</span></div>
+    </div></div>
+    <p class="note">El menú aparece <strong>al presionar el prefix, no antes</strong>: documentación
+      viviendo donde la necesitas, sin ocupar pantalla el resto del tiempo. <code>^a ^a</code>
+      pasa el prefix literal — sin eso, tmux o readline dentro de un pane quedan inutilizables.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-lbl"><b>8.2</b> paleta <span class="kbd">^a :</span></div>
+    <div class="stage"><div class="app">
+      <div class="canvas" style="filter:blur(1.4px);opacity:.45">
+        <div class="row"><div class="pane"><div class="body"><span class="ln"> 12</span> <span class="kw">impl</span> Trie {
+<span class="ln"> 13</span>     <span class="kw">pub fn</span> step(&amp;<span class="kw">mut self</span>, key: KeyEvent)
+</div></div></div>
+      </div>
+      <div class="scrim"></div>
+      <div class="pop narrow">
+        <div class="pop-in"><span class="l">:</span><span>agen</span><span class="cur"></span></div>
+        <div class="cmd on"><span class="c">agent.spawn</span><span class="d">lanzar en worktree</span><span class="k">^a n</span></div>
+        <div class="cmd"><span class="c">agent.send</span><span class="d">mandar sin robar foco</span><span class="k">^a m</span></div>
+        <div class="cmd"><span class="c">agent.interrupt</span><span class="d">cortar el turno</span><span class="k">—</span></div>
+        <div class="cmd"><span class="c">agent.kill</span><span class="d">terminar sesión</span><span class="k">^a u ^k</span></div>
+        <div class="cmd"><span class="c">agent.switch_vendor</span><span class="d">relanzar con otro</span><span class="k">—</span></div>
+        <div class="pop-foot">5 de 47 · los mismos nombres que usan Lua y los agentes por MCP</div>
+      </div>
+      <div class="sl"><span class="mode">PALETA</span><span class="ws">bus de comandos</span></div>
+    </div></div>
+    <p class="note">Un registro, cuatro consumidores: teclado, paleta, config Lua y
+      <strong>los agentes vía MCP</strong> — el único protocolo que Claude Code, Codex y OpenCode
+      hablan en común. Que un agente pueda abrirte un pane o posicionarte un diff sale gratis de
+      que todo tenga nombre.</p>
+  </div>
+</div>
+
+<!-- ═══ 09 ═══ -->
+<div class="flow">
+  <div class="flow-head"><span class="n">09</span><h2>El editor es tu neovim</h2><span class="keys">nvim --embed</span></div>
+  <div class="step">
+    <div class="stage"><div class="app">
+      <div class="canvas"><div class="row">
+        <div class="pane focus">
+          <div class="body"><span class="ln"> 22</span> <span class="cm">-- tus keymaps, tal cual los tienes hace años</span>
+<span class="ln"> 23</span> <span class="kw">vim</span>.keymap.set(<span class="str">"n"</span>, <span class="str">"&lt;leader&gt;ff"</span>, builtin.find_files)
+<span class="ln"> 24</span> <span class="kw">vim</span>.keymap.set(<span class="str">"n"</span>, <span class="str">"&lt;leader&gt;fg"</span>, builtin.live_grep)
+<span class="ln"> 25</span> <span class="kw">vim</span>.keymap.set(<span class="str">"n"</span>, <span class="str">"&lt;leader&gt;ca"</span>, <span class="kw">vim</span>.lsp.buf.code_action)
+<span class="ln"> 26</span> <span class="kw">vim</span>.keymap.set(<span class="str">"n"</span>, <span class="str">"gd"</span>, <span class="kw">vim</span>.lsp.buf.definition)
+<span class="ln"> 27</span>
+<span class="ln"> 28</span> <span class="cm">-- tus plugins, tu colorscheme, tu LSP</span>
+<span class="ln"> 29</span> <span class="kw">require</span>(<span class="str">"lazy"</span>).setup(<span class="str">"plugins"</span>, {
+<span class="ln"> 30</span>   install = { colorscheme = { <span class="str">"kanagawa"</span> } },
+<span class="ln"> 31</span>   checker  = { enabled = <span class="kw">true</span> },
+<span class="ln"> 32</span> })<span class="cur"></span>
+<span class="ln"> 33</span>
+<span class="ln"> 34</span> <span class="cm">-- agentdeck no toca nada de esto.</span>
+<span class="ln"> 35</span> <span class="cm">-- habla msgpack-rpc y pinta la grilla.</span>
+</div>
+          <div class="nvsl"><span class="n">NORMAL</span><span>~/.config/nvim/init.lua</span><span class="d">lua · lazy 47</span><span style="margin-left:auto">32:3</span></div>
+        </div>
+        <div class="pane" style="flex:0 0 268px">
+          <div class="body"><span class="d">$</span> agentdeck doctor
+
+<span class="l">✓</span> <span class="m">nvim 0.11.2</span>
+  <span class="d">rpc msgpack · ui attach ok</span>
+  <span class="d">init.lua 1.4 KB · 47 plugins</span>
+
+<span class="l">✓</span> <span class="m">adaptadores</span>
+  <span class="d">claude    tier 1  hooks</span>
+  <span class="d">codex     tier 2  callback</span>
+  <span class="d">opencode  tier 2  callback</span>
+  <span class="d">observed  tier 3  pty</span>
+
+<span class="l">✓</span> <span class="m">bus mcp</span>
+  <span class="d">47 comandos expuestos</span>
+  <span class="d">socket ~/.agentdeck/mcp.sock</span>
+
+<span class="d">$</span> <span class="cur h"></span></div>
+        </div>
+      </div></div>
+      <div class="sl"><span class="ws">agentdeck</span><span>1/2</span><span class="rt"><span class="d">nvim 0.11 · rpc</span></span></div>
+    </div></div>
+    <p class="note">No se construye un editor: se hospeda <strong>tu</strong> neovim por msgpack-RPC
+      y se pinta su grilla con el mismo renderer de los panes de terminal. Tu config, tus plugins
+      y tu LSP funcionan el día uno — y ganan render por GPU, scroll suave y overlays reales,
+      que es exactamente lo que el terminal te niega.</p>
+  </div>
+</div>
+
+<!-- ═══ 10 ═══ -->
+<div class="flow">
+  <div class="flow-head"><span class="n">10</span><h2>Cuando el vendor no coopera</h2><span class="keys">tier 3</span></div>
+  <div class="step">
+    <div class="stage"><div class="app">
+      <div class="canvas"><div class="row">
+        <div class="pane">
+          <div class="ahead"><span class="dot w"></span><span class="nm">ws-order</span><span class="vd">CC</span><span class="st">0:42 · 62% · $2.41</span></div>
+          <div class="body"><span class="d">tier 1 — el vendor reporta todo</span>
+
+<span class="l">●</span> <span class="m">Edit</span><span class="d">(create.use-case.ts)</span>
+  <span class="tr">⎿</span> <span class="d">3 adiciones, 1 remoción</span>
+
+<span class="d">La cabecera puede mostrar:</span>
+<span class="d">  · estado</span>
+<span class="d">  · tiempo en estado</span>
+<span class="d">  · contexto restante</span>
+<span class="d">  · costo acumulado</span>
+<span class="d">  · herramienta en curso</span>
+<span class="d">  · motivo exacto del bloqueo</span></div>
+        </div>
+        <div class="pane">
+          <div class="ahead"><span class="dot w"></span><span class="nm">portscout</span><span class="vd">OC</span><span class="st">3:08</span></div>
+          <div class="body"><span class="d">tier 2 — solo transiciones</span>
+
+<span class="l">▌</span> <span class="m">agregá el pool concurrente</span>
+
+<span class="d">La cabecera muestra:</span>
+<span class="d">  · estado</span>
+<span class="d">  · tiempo en estado</span>
+
+<span class="d">Lo demás no se dibuja.</span>
+<span class="d">No hay huecos ni «—»:</span>
+<span class="d">la línea simplemente</span>
+<span class="d">es más corta.</span></div>
+        </div>
+        <div class="pane">
+          <div class="ahead"><span class="dot w"></span><span class="nm">video-finder</span><span class="vd t3">AI</span><span class="st">0:51</span></div>
+          <div class="body"><span class="d">tier 3 — nada. Se infiere.</span>
+
+<span class="d">&gt; editando downloader.py…</span>
+
+<span class="d">La etiqueta va punteada:</span>
+<span class="d">el estado es inferido de la</span>
+<span class="d">quiescencia del PTY, no</span>
+<span class="d">reportado por el vendor.</span>
+
+<span class="d">Funciona el día uno con</span>
+<span class="d">cualquier CLI. Gana fidelidad</span>
+<span class="d">cuando alguien le escriba</span>
+<span class="d">su adaptador.</span></div>
+        </div>
+      </div></div>
+      <div class="sl"><span class="ws">acme</span><span>4/4</span><span class="rt"><span class="d">hoy $18.60+ · solo tier 1 reporta costo</span></span></div>
+    </div></div>
+    <p class="note">La misma cabecera en los tres, con distinta cantidad de datos. <strong>La UI
+      degrada, no se rompe.</strong> Y el costo del día lleva <code>+</code> porque solo suma los
+      vendors que lo reportan — sin ese signo, la cifra miente.</p>
+  </div>
+</div>
+
+<!-- ═══ SISTEMA ═══ -->
+<div class="sys">
+  <h1 style="font-size:19px;margin-bottom:12px">Sistema</h1>
+  <p class="thesis">Las reglas que hacen que las diez pantallas de arriba sean la misma pantalla.</p>
+
+  <h3>Las cinco reglas</h3>
+  <div class="rule-grid">
+    <div class="rule"><h4>Ambiente mínimo, demanda completa</h4>
+      <p>En reposo el sistema dice <strong>una cosa</strong>: cuántos agentes te esperan, en un
+        carácter. Toda la densidad vive en overlays que invocas.</p></div>
+    <div class="rule"><h4>El cromo se gana</h4>
+      <p>Un pane lleva encabezado <strong>solo si no se identifica por su contenido</strong>. Nvim y
+        las shells no lo llevan; los agentes sí.</p></div>
+    <div class="rule"><h4>Foco es línea, alerta es relleno</h4>
+      <p>Mismo papel, canales distintos. Un pane puede estar enfocado y esperándote sin que se
+        pierda ninguna de las dos señales.</p></div>
+    <div class="rule"><h4>El sistema gobierna el marco, no el contenido</h4>
+      <p>Dentro del pane manda el usuario: tu colorscheme, los colores ANSI, la TUI del vendor.
+        <strong>Por eso el marco es tan callado.</strong></p></div>
+    <div class="rule"><h4>La ausencia no se rellena</h4>
+      <p>Si un vendor no reporta costo, no hay «—» ni hueco: la línea es más corta. Un dato
+        vacío es peor que ningún dato.</p></div>
+  </div>
+
+  <h3>Los tres vendors</h3>
+  <div class="tw"><table>
+    <thead><tr><th class="k">Vendor</th><th>Su TUI</th><th class="k">Tier</th><th>Qué aporta la cabecera</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Claude Code<br><span style="color:var(--page-dim)">CC</span></td>
+        <td><code>●</code> por tool, <code>⎿</code> continuación, permisos en menú numerado, input en caja, hints abajo</td>
+        <td class="k">1 · hooks</td>
+        <td>Estado, tiempo, contexto, costo, tool en curso, motivo del bloqueo</td></tr>
+      <tr><td class="k">Codex<br><span style="color:var(--page-dim)">CX</span></td>
+        <td>ratatui: historial arriba, composer abajo, footer de una línea con spinner e interrupt hints. Patches con <code>[y]/[n]</code></td>
+        <td class="k">2 · callback</td>
+        <td>Estado y tiempo en estado</td></tr>
+      <tr><td class="k">OpenCode<br><span style="color:var(--page-dim)">OC</span></td>
+        <td>Gutter a la izquierda, leader <code>^x</code>, <code>^p</code> paleta, <code>@</code> para archivos, <code>!</code> para bash</td>
+        <td class="k">2 · callback</td>
+        <td>Estado y tiempo en estado</td></tr>
+      <tr><td class="k">Cualquier otro<br><span style="color:var(--page-dim)">punteado</span></td>
+        <td>La que sea. Corre en un PTY y se pinta tal cual</td>
+        <td class="k">3 · observado</td>
+        <td>Estado aproximado, marcado como inferido</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note" style="margin-top:12px">Las TUI dibujadas arriba son <strong>aproximaciones
+    fieles a la estructura documentada</strong> de cada vendor, no capturas. El tier de Codex y
+    OpenCode hay que confirmarlo contra su CLI vigente al empezar M2 — se mueven rápido.</p>
+
+  <h3>Paleta</h3>
+  <div class="sw-row">
+    <div class="sw"><div class="c" style="background:#101015;box-shadow:inset 0 0 0 1px var(--page-line)"></div>
+      <div class="t"><b>#101015</b><i>ink</i><u>Ground, panes, canaletas</u></div></div>
+    <div class="sw"><div class="c" style="background:#17171d"></div>
+      <div class="t"><b>#17171D</b><i>raised</i><u>Statusline</u></div></div>
+    <div class="sw"><div class="c" style="background:#26262f"></div>
+      <div class="t"><b>#26262F</b><i>line</i><u>Bordes en reposo</u></div></div>
+    <div class="sw"><div class="c" style="background:#506385"></div>
+      <div class="t"><b>#506385</b><i>slate</i><u>Listo · 3.1:1, solo forma</u></div></div>
+    <div class="sw"><div class="c" style="background:#8199bd"></div>
+      <div class="t"><b>#8199BD</b><i>lift</i><u>Trabajando · modos · 6.5:1</u></div></div>
+    <div class="sw"><div class="c" style="background:#d0685c"></div>
+      <div class="t"><b>#D0685C</b><i>coral</i><u>Caído · 5.3:1</u></div></div>
+    <div class="sw"><div class="c" style="background:#f1f0e1"></div>
+      <div class="t"><b>#F1F0E1</b><i>paper</i><u>Texto · foco · alerta · 16.5:1</u></div></div>
+  </div>
+
+  <h3>Teclado</h3>
+  <div class="tw"><table>
+    <thead><tr><th class="k">Tecla</th><th>Acción</th><th>Comando</th><th>Por qué esa</th></tr></thead>
+    <tbody>
+      <tr><td class="k">^a u</td><td>Abrir la flota</td><td>fleet.open</td><td>La misma de tu <code>tmux-cc-sessions</code>. No reaprendes nada</td></tr>
+      <tr><td class="k">^a m</td><td>Mensaje sin robar foco</td><td>agent.compose</td><td>Lo que tmux no puede sin sacarte del pane</td></tr>
+      <tr><td class="k">^a n</td><td>Agente nuevo en worktree</td><td>agent.spawn</td><td>Aísla por defecto, sin pedírtelo</td></tr>
+      <tr><td class="k">^a d</td><td>Diff del worktree</td><td>diff.show</td><td>Revisar es la mitad del trabajo con agentes</td></tr>
+      <tr><td class="k">^a w</td><td>Cambiar workspace</td><td>ws.pick</td><td>Popup, no barra de pestañas</td></tr>
+      <tr><td class="k">^a :</td><td>Paleta</td><td>—</td><td>Todo lo que aún no tiene tecla</td></tr>
+      <tr><td class="k">^a ^a</td><td>Prefix literal al pane</td><td>—</td><td>Sin esto, tmux y readline dentro del pane se rompen</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note" style="margin-top:12px">Prefix, no modos globales: un pane de terminal con foco
+    <strong>tiene que recibir las teclas tal cual</strong> — y con tres vendors, cada uno con su
+    propio leader (<code>^x</code> en OpenCode, slash en Codex), interceptar de más rompe el
+    agente. Toda la tabla es la default de M0; en M4 la reemplaza Lua sin tocar la UI.</p>
+
+  <h3>Lo que no tiene, a propósito</h3>
+  <div class="rule-grid">
+    <div class="rule"><h4>Barra de pestañas</h4><p>Workspace y posición viven en la statusline. Cambiar de tab es un popup, como cambiar de sesión en tmux.</p></div>
+    <div class="rule"><h4>Panel lateral permanente</h4><p>Era el diseño anterior y era el error: información que no pediste, ocupando ancho siempre.</p></div>
+    <div class="rule"><h4>Browser y notas</h4><p>Los tiene la competencia. Cada superficie que agregas es una que tienes que mirar.</p></div>
+    <div class="rule"><h4>Editor propio</h4><p>Ya tienes uno configurado hace años. El trabajo es hospedarlo, no reemplazarlo.</p></div>
+    <div class="rule"><h4>UI propia por vendor</h4><p>Nada de reimplementar la vista de Claude Code o de Codex. Su TUI es suya; agentdeck aporta una línea.</p></div>
+  </div>
+</div>
+
+<footer>
+  <span>agentdeck · prediseño M3 · nombre provisional</span>
+  <span>2026-08-17</span>
+</footer>
+
+</div>
